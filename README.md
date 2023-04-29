@@ -1,24 +1,20 @@
-## Amalgalite
+## libsql
 
-[![Build Status](https://copiousfreetime.semaphoreci.com/badges/amalgalite/branches/main.svg?key=6d8f47c8-bfc7-4969-a128-424478908a27)](https://copiousfreetime.semaphoreci.com/projects/amalgalite)
+[![Build Status](https://copiousfreetime.semaphoreci.com/badges/libsql-ruby/branches/main.svg?key=6d8f47c8-bfc7-4969-a128-424478908a27)](https://copiousfreetime.semaphoreci.com/projects/libsql-ruby)
 
-* [Homepage](http://github.com/copiousfreetime/amalgalite)
-* `git clone git://github.com/copiousfreetime/amalgalite.git`
-* [Github](http://github.com/copiousfreetime/amalgalite/)
-* [Bug Tracking](http://github.com/copiousfreetime/amalgalite/issues)
-
-## Articles
-
-*  [Writing SQL Functions in Ruby](http://copiousfreetime.org/articles/2009/01/10/writing-sql-functions-in-ruby.html)
+* [Homepage](http://github.com/copiousfreetime/libsql-ruby)
+* `git clone git://github.com/copiousfreetime/libsql-ruby.git`
+* [Github](http://github.com/copiousfreetime/libsql-ruby/)
+* [Bug Tracking](http://github.com/copiousfreetime/libsql-ruby/issues)
 
 ## INSTALL
 
-* `gem install amalgalite`
+* `gem install libsql`
 
 ## DESCRIPTION
 
-Amalgalite embeds the SQLite database engine as a ruby extension. There is no
-need to install SQLite separately.
+libsql embeds the [libsql](https://libsql.org/) fork of the SQLite database
+engine as a ruby extension. There is no need to install libsql separately.
 
 Look in the examples/ directory to see
 
@@ -30,10 +26,10 @@ Look in the examples/ directory to see
 * requiring ruby code from a database
 * full text search
 
-Also Scroll through Amalgalite::Database for a quick example, and a general
+Also scroll through Libsql::Database for a quick example, and a general
 overview of the API.
 
-Amalgalite adds in the following additional non-default SQLite extensions:
+libsql adds in the following additional non-default SQLite extensions:
 
 * [R*Tree index extension](http://sqlite.org/rtree.html)
 * [Full Text Search](http://sqlite.org/fts5.html) - both fts3 and fts5
@@ -42,7 +38,7 @@ Amalgalite adds in the following additional non-default SQLite extensions:
 
 Other extensions are add that might not be usable/visible by users of the gem.
 The full list of extensions added is in
-[extconf.rb](ext/amalgalite/c/extconf.rb). And those may be cross referenced
+[extconf.rb](ext/libsql/c/extconf.rb). And those may be cross referenced
 against the [compile options from SQLite](https://www.sqlite.org/compile.html)
 
 ## CREDITS
@@ -51,11 +47,11 @@ against the [compile options from SQLite](https://www.sqlite.org/compile.html)
 
 ## CHANGES
 
-Read the HISTORY.rdoc file.
+Read the [HISTORY.md](HISTORY.md) file.
 
 ## LICENSE
 
-Copyright (c) 2008 Jeremy Hinegardner
+Copyright (c) 2023 Jeremy Hinegardner
 
 All rights reserved.
 

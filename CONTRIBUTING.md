@@ -18,7 +18,7 @@ easiest way to contribute.
     * **Bug reports** please be as detailed as possible. Include:
         * full ruby engine and version: `ruby -e 'puts RUBY_DESCRIPTION'`
         * operating system and version
-        * version of amalgalite `ruby -rubygems -e "require 'amalgalite'; puts Amalgalite::VERSION"`
+        * version of libsql `ruby -rubygems -e "require 'libsql'; puts Libsql::VERSION"`
         * as much detail about the bug as possible so I can replicate it. Feel free
           to link in a [gist][]
     * **New Feature**
@@ -53,8 +53,8 @@ This is done using https://github.com/rake-compiler/rake-compiler-dock
 * [Alex Young](https://github.com/bmalex)
 
 [GitHub Account]: https://github.com/signup/free "GitHub Signup"
-[GitHub Issues]:  https://github.com/copiousfreetime/amalgalite/issues "Amalgalite Issues"
-[new issue]:      https://github.com/copiousfreetime/amalgalite/issues/new "New Amalgalite Issue"
+[GitHub Issues]:  https://github.com/copiousfreetime/libsql-ruby/issues "libsql-ruby Issues"
+[new issue]:      https://github.com/copiousfreetime/libsql-ruby/issues/new "New libsql-ruby Issue"
 [gist]:           https://gist.github.com/ "New Gist"
-[repo]:           https://github.com/copiousfreetime/amalgalite "Amalgalite Repo"
+[repo]:           https://github.com/copiousfreetime/libsql-ruby "libsql-ruby Repo"
 [pull request]:   https://help.github.com/articles/using-pull-requests "Using Pull Requests"

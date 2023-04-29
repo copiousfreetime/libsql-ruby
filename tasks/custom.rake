@@ -31,7 +31,7 @@ namespace :util do
       sqlite3_vfs_unregister
     ]
 
-    sqlite_h = File.join( *%w[ ext amalgalite c sqlite3.h ] )
+    sqlite_h = File.join( *%w[ ext libsql c sqlite3.h ] )
     api_todo = {}
     IO.readlines( sqlite_h ).each do |line|
       if line =~ /\ASQLITE_API/ then
@@ -44,7 +44,7 @@ namespace :util do
       end
     end
 
-    Dir.glob("ext/amalgalite/c/amalgalite*.c").each do |am_file|
+    Dir.glob("ext/libsql/c/libsql*.c").each do |am_file|
       IO.readlines( am_file ).each do |am_line|
         if md = am_line.match( /(sqlite3_[^(\s]+)\(/ ) then
                                  api_todo.delete( md.captures[0] )
@@ -56,44 +56,77 @@ namespace :util do
     puts api_todo.keys.sort.join("\n")
   end
 
-  desc "Download and integrate a version of sqlite"
-  task :update_sqlite, [:version,:year] do |task, args|
-    version      = args[:version] or abort "A version of SQLite please `rake #{task.name}[version,year]`"
-    version_year = args[:year]    or abort "The Year #{version} was released please `rake #{task.name}[version,year]`"
-
+  desc "Download and integrate the latest version of libsql"
+  task :update_libsql, [:version] do |task, args|
     require 'uri'
     require 'open-uri'
-    require 'archive/zip'
 
-    parts = version.split(".")
-    next_version = [ parts.shift.to_s ]
-    parts.each do |p|
-      next_version << "#{"%02d" % p }"
+    asset_regex = /\Alibsql-amalgamation-(\d+\.\d+\.\d+)\.tar\.gz\Z/
+
+    asset = nil
+    require 'debug'
+
+    if args[:version] then
+      all_releases_uri = "https://api.github.com/repos/libsql/libsql/releases"
+      all_releases_json  = ::URI.parse(all_releases_uri).read
+      all_releases_parsed = JSON.parse(all_releases_json)
+      version_release = all_releases_parsed.find { |p| p['tag_name'] == "libsql-#{args[:version]}" }
+      if version_release then
+        assets_url = version_release['assets_url']
+        assets_json = ::URI.parse(assets_url).read
+        assets_parsed = JSON.parse(assets_json)
+        asset = assets_parsed.find { |a| a['name'] =~ asset_regex }
+      else
+        msg = [
+        "Unable to find release for `libsql-#{args[:version]}`. Found releases for:"
+        ]
+        all_releases_parsed.map{ |p| p['tag_name'] }.each do |tag|
+          msg << "  #{tag}"
+        end
+
+        abort msg.join("\n")
+      end
+    else
+      latest_uri = "https://api.github.com/repos/libsql/libsql/releases/latest"
+      latest_json = ::URI.parse(latest_uri).read
+      latest_parsed = JSON.parse(latest_json)
+      asset = latest_parsed['assets'].find { |a| a['name'] =~ asset_regex }
     end
-    next_version << "00" if next_version.size == 3
 
-    next_version = next_version.join('')
+    asset_name = asset['name']
+    tarball_uri = ::URI.parse(asset['browser_download_url'])
+    puts "Downloading from #{tarball_uri}"
+    file = "tmp/#{File.basename(tarball_uri.path)}"
+    puts "              to #{file}"
 
-    url = ::URI.parse("http://sqlite.org/#{version_year}/sqlite-amalgamation-#{next_version}.zip")
-    puts "downloading #{url.to_s} ..."
-    file = "tmp/#{File.basename( url.path ) }"
     FileUtils.mkdir "tmp" unless File.directory?( "tmp" )
-    File.open( file, "wb+") do |f|
-      url.open do |input|
-        f.write( input.read )
+    if File.exist?(file) then
+      puts "  #{file} already exists.."
+    else
+      File.open( file, "wb+") do |f|
+        tarball_uri.open do |input|
+          f.write( input.read )
+        end
       end
     end
 
-    puts "extracting..."
-    upstream_files = %w[ sqlite3.h sqlite3.c sqlite3ext.h ]
-    Archive::Zip.open( file ) do |archive|
-      archive.each do |entry|
-        next unless entry.file?
-        bname = File.basename( entry.zip_path)
-        if upstream_files.include?( bname ) then
-          dest_file = File.join( "ext", "amalgalite", "c", bname )
-          puts "updating #{dest_file}"
-          entry.extract(file_path: dest_file)
+    puts "extracting"
+    upstream_files = %w[ sqlite3.h sqlite3.c ]
+
+    require 'rubygems'
+    # Using the built in rubygems tar reader since we know it exists
+    ::Zlib::GzipReader.open(file) do |gz|
+      ::Gem::Package::TarReader.new(gz) do |reader|
+        reader.each do |entry|
+          next unless entry.file?
+          bname = File.basename(entry.full_name)
+          if upstream_files.include?(bname) then
+            dest_path = File.join( "ext", "libsql", "c", bname )
+            puts "updating #{dest_path}"
+            File.open(dest_path, "w+") do |dest_file|
+              dest_file.write(entry.read)
+            end
+          end
         end
       end
     end
