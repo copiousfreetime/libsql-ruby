@@ -49,6 +49,7 @@ typedef struct libsql_ext_protected {
 extern VALUE mL;              /* module Libsql                     */
 extern VALUE mLS;             /* module Libsql::SQLite3            */
 extern VALUE mLSV;            /* module Libsql::SQLite3::Version   */
+extern VALUE mLSLibsqlVersion;/* module Libsql::SQLite3::LibsqlVersion   */
 extern VALUE eLS_Error;       /* class  Libsql::SQLite3::Error     */
 
 /*----------------------------------------------------------------------

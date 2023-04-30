@@ -11,6 +11,7 @@
 VALUE mL;              /* module Libsql                     */
 VALUE mLS;             /* module Libsql::SQLite3            */
 VALUE mLSV;            /* module Libsql::SQLite3::Version   */
+VALUE mLSLibsqlVersion;/* module Libsql::SQLite3::LibsqlVersion   */
 VALUE eLS_Error;       /* class  Libsql::SQLite3::Error     */
 VALUE cLS_Stat;        /* class  Libsql::SQLite3::Stat      */
 
@@ -283,6 +284,29 @@ VALUE libsql_ext_sqlite3_compiled_source_id(VALUE self)
     return rb_str_new2( SQLITE_SOURCE_ID );
 }
 
+/*
+ * call-seq:
+ *    Libsql::SQLite3::LibsqlVersion.compiled_version -> String
+ *
+ * Return the compiled SQLite C library source libsql_version as a string
+ *
+ */
+VALUE libsql_ext_sqlite3_libsql_compiled_version(VALUE self) {
+    return rb_str_new2( LIBSQL_VERSION );
+}
+
+/*
+ * call-seq:
+ *    Libsql::SQLite3::LibsqlVersion.to_s -> String
+ *
+ * Return the runtime SQLite C library source libsql_version as a string
+ *
+ */
+VALUE libsql_ext_sqlite3_libsql_runtime_version(VALUE self) {
+    return rb_str_new2( libsql_libversion() );
+}
+
+
 /**
  * Document-class: Libsql::SQLite3
  *
@@ -332,6 +356,11 @@ void Init_libsql_ext()
     rb_define_module_function(mLSV, "compiled_version_number", libsql_ext_sqlite3_compiled_version_number, 0 ); /* in libsql_ext.c */
     rb_define_module_function(mLSV, "runtime_source_id", libsql_ext_sqlite3_runtime_source_id, 0); /* in libsql_ext.c */
     rb_define_module_function(mLSV, "compiled_source_id", libsql_ext_sqlite3_compiled_source_id, 0); /* in libsql_ext.c */
+
+    mLSLibsqlVersion = rb_define_module_under(mLS, "LibsqlVersion");
+    rb_define_module_function(mLSLibsqlVersion, "to_s", libsql_ext_sqlite3_libsql_runtime_version, 0); /* in libsql_ext.c */
+    rb_define_module_function(mLSLibsqlVersion, "runtime_version", libsql_ext_sqlite3_libsql_runtime_version, 0 ); /* in libsql_ext.c */
+    rb_define_module_function(mLSLibsqlVersion, "compiled_version", libsql_ext_sqlite3_libsql_compiled_version, 0 ); /* in libsql_ext.c */
 
     /*
      * Initialize the rest of the module
