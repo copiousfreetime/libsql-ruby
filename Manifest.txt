@@ -35,7 +35,6 @@ lib/libsql/database.rb
 lib/libsql/function.rb
 lib/libsql/index.rb
 lib/libsql/memory_database.rb
-lib/libsql/packer.rb
 lib/libsql/paths.rb
 lib/libsql/profile_tap.rb
 lib/libsql/progress_handler.rb
@@ -73,7 +72,6 @@ spec/integeration_spec.rb
 spec/iso_3166_database.rb
 spec/json_spec.rb
 spec/libsql_spec.rb
-spec/packer_spec.rb
 spec/paths_spec.rb
 spec/progress_handler_spec.rb
 spec/rtree_spec.rb
