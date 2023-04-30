@@ -6,9 +6,10 @@ lib/libsql/1.8
 lib/libsql/1.9
 lib/libsql/2.*
 lib/libsql/3.*
-ext/libsql/Makefile
-ext/libsql/rbconfig.rb
-ext/libsql/*.def
+ext/libsql/c/Makefile
+ext/libsql/c/rbconfig.rb
+ext/libsql/c/*.def
+ext/libsql/c/*.log
 examples/*.db
 tmp/*
 *~
@@ -16,6 +17,8 @@ tmp/*
 email.txt
 spec/data/*.db
 *.bundle
+*.so
+*.o
 .gem/
 vendor/
 .byebug_history
