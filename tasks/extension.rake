@@ -7,6 +7,7 @@
 begin
   require 'rake/extensiontask'
   Rake::ExtensionTask.new( This.name ) do |ext|
+    ext.name      = "#{This.name}_ext"
     ext.ext_dir   = File.join( 'ext', This.name, "c" )
     ext.lib_dir   = File.join( 'lib', This.name )
     ext.gem_spec  = This.ruby_gemspec

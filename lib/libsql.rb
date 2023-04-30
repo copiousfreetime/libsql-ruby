@@ -21,10 +21,10 @@ end
 # this is the method recommended by rake-compiler
 begin
   # this will be for windows
-  require "libsql/#{RUBY_VERSION.sub(/\.\d+$/,'')}/libsql"
+  require "libsql/#{RUBY_VERSION.sub(/\.\d+$/,'')}/libsql_ext"
 rescue LoadError
   # everyone else.
-  require 'libsql/libsql'
+  require 'libsql/libsql_ext'
 end
 
 

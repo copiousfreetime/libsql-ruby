@@ -83,4 +83,4 @@ ignoreable_warnings.each do |warning|
 end
 
 subdir = RUBY_VERSION.sub(/\.\d$/,'')
-create_makefile("libsql/#{subdir}/libsql")
+create_makefile("libsql/#{subdir}/libsql_ext")
