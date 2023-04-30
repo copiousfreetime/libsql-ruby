@@ -1,6 +1,6 @@
 ## libsql
 
-[![Build Status](https://copiousfreetime.semaphoreci.com/badges/libsql-ruby/branches/main.svg?key=6d8f47c8-bfc7-4969-a128-424478908a27)](https://copiousfreetime.semaphoreci.com/projects/libsql-ruby)
+[![Build Status](https://copiousfreetime.semaphoreci.com/badges/libsql-ruby/branches/main.svg)](https://copiousfreetime.semaphoreci.com/projects/libsql-ruby)
 
 * [Homepage](http://github.com/copiousfreetime/libsql-ruby)
 * `git clone git://github.com/copiousfreetime/libsql-ruby.git`
