@@ -7,7 +7,7 @@
  */ 
 
 /* class  Amalgliate::SQLite3::Blob */
-VALUE cAS_Blob;   
+VALUE cLS_Blob;   
 
 /**
  * call-seq:
@@ -18,11 +18,11 @@ VALUE cAS_Blob;
  * writing "w" or reading "r".
  *
  */
-VALUE am_sqlite3_blob_initialize( VALUE self, VALUE db, VALUE db_name, VALUE table_name, VALUE column_name, VALUE rowid, VALUE flag) 
+VALUE libsql_ext_sqlite3_blob_initialize( VALUE self, VALUE db, VALUE db_name, VALUE table_name, VALUE column_name, VALUE rowid, VALUE flag) 
 {
-    am_sqlite3_blob *am_blob;
+    libsql_ext_sqlite3_blob *libsql_ext_blob;
     int              rc;
-    am_sqlite3      *am_db;
+    libsql_ext_sqlite3      *libsql_ext_db;
     char            *zDb      = StringValuePtr( db_name );
     char            *zTable   = StringValuePtr( table_name );
     char            *zColumn  = StringValuePtr( column_name );
@@ -31,16 +31,16 @@ VALUE am_sqlite3_blob_initialize( VALUE self, VALUE db, VALUE db_name, VALUE tab
     int              flags    = 0;
 
     /* extract the blob struct */
-    Data_Get_Struct(self, am_sqlite3_blob, am_blob);
+    Data_Get_Struct(self, libsql_ext_sqlite3_blob, libsql_ext_blob);
     
     /* extract the sqlite3 db struct */
-    Data_Get_Struct(db, am_sqlite3, am_db);
+    Data_Get_Struct(db, libsql_ext_sqlite3, libsql_ext_db);
 
     /* make sure that the flags are valid, only 'r' or 'w' are allowed */
     if ( ( RSTRING_LEN( flag_str ) != 1) || 
          ( ( 'r' != RSTRING_PTR( flag_str )[0] ) && 
            ( 'w' != RSTRING_PTR( flag_str )[0] ))) {
-        rb_raise( eAS_Error, "Error opening Blob in db = %s, table = %s, column = %s, rowid = %lu.  Invalid flag '%s'.  Must be either 'w' or 'r'\n",
+        rb_raise( eLS_Error, "Error opening Blob in db = %s, table = %s, column = %s, rowid = %lu.  Invalid flag '%s'.  Must be either 'w' or 'r'\n",
                              zDb, zTable, zColumn, (unsigned long)iRow, RSTRING_PTR( flag_str ));
     }
 
@@ -50,17 +50,17 @@ VALUE am_sqlite3_blob_initialize( VALUE self, VALUE db, VALUE db_name, VALUE tab
     }
 
     /* open the blob and associate the db to it */
-    rc = sqlite3_blob_open( am_db->db, zDb, zTable, zColumn, iRow, flags, &( am_blob->blob ) );
+    rc = sqlite3_blob_open( libsql_ext_db->db, zDb, zTable, zColumn, iRow, flags, &( libsql_ext_blob->blob ) );
     if ( SQLITE_OK != rc ) {
-        rb_raise( eAS_Error, "Error opening Blob in db = %s, table = %s, column = %s, rowid = %lu : [SQLITE_ERROR %d] %s\n", zDb, zTable, zColumn, (unsigned long)iRow, rc, sqlite3_errmsg( am_db->db) );  
+        rb_raise( eLS_Error, "Error opening Blob in db = %s, table = %s, column = %s, rowid = %lu : [SQLITE_ERROR %d] %s\n", zDb, zTable, zColumn, (unsigned long)iRow, rc, sqlite3_errmsg( libsql_ext_db->db) );  
     }
-    am_blob->length = sqlite3_blob_bytes( am_blob->blob );
-    am_blob->db = am_db->db;
+    libsql_ext_blob->length = sqlite3_blob_bytes( libsql_ext_blob->blob );
+    libsql_ext_blob->db = libsql_ext_db->db;
 
     /* if a block is given then yield self and close the blob when done */
     if ( rb_block_given_p() ) {
         rb_yield( self );
-        am_sqlite3_blob_close( self );
+        libsql_ext_sqlite3_blob_close( self );
         return Qnil;
     } else {
         return self;
@@ -73,16 +73,16 @@ VALUE am_sqlite3_blob_initialize( VALUE self, VALUE db, VALUE db_name, VALUE tab
  *
  * Closes the blob.
  */
-VALUE am_sqlite3_blob_close( VALUE self )
+VALUE libsql_ext_sqlite3_blob_close( VALUE self )
 {
-    am_sqlite3_blob *am_blob;
+    libsql_ext_sqlite3_blob *libsql_ext_blob;
     int              rc;
     
-    Data_Get_Struct(self, am_sqlite3_blob, am_blob);
-    rc = sqlite3_blob_close( am_blob->blob );
+    Data_Get_Struct(self, libsql_ext_sqlite3_blob, libsql_ext_blob);
+    rc = sqlite3_blob_close( libsql_ext_blob->blob );
     if ( SQLITE_OK != rc ) {
-        rb_raise(eAS_Error, "Error closing blob: [SQLITE_ERROR %d] %s\n",
-                rc, sqlite3_errmsg( am_blob->db ));
+        rb_raise(eLS_Error, "Error closing blob: [SQLITE_ERROR %d] %s\n",
+                rc, sqlite3_errmsg( libsql_ext_blob->db ));
     }
 
 
@@ -96,13 +96,13 @@ VALUE am_sqlite3_blob_close( VALUE self )
  *
  * Returns the number of bytes in the blob.
  */
-VALUE am_sqlite3_blob_length( VALUE self )
+VALUE libsql_ext_sqlite3_blob_length( VALUE self )
 {
-    am_sqlite3_blob *am_blob;
+    libsql_ext_sqlite3_blob *libsql_ext_blob;
 
-    Data_Get_Struct(self, am_sqlite3_blob, am_blob);
+    Data_Get_Struct(self, libsql_ext_sqlite3_blob, libsql_ext_blob);
 
-    return INT2FIX( am_blob->length );
+    return INT2FIX( libsql_ext_blob->length );
 }
 
 /**
@@ -111,36 +111,36 @@ VALUE am_sqlite3_blob_length( VALUE self )
  *
  * returns int number of bytes as a String from the database
  */
-VALUE am_sqlite3_blob_read( VALUE self, VALUE length )
+VALUE libsql_ext_sqlite3_blob_read( VALUE self, VALUE length )
 {
-    am_sqlite3_blob *am_blob;
+    libsql_ext_sqlite3_blob *libsql_ext_blob;
     int             rc;
     int              n = NUM2INT( length );
     void           *buf = NULL;
     VALUE          result;
 
-    Data_Get_Struct(self, am_sqlite3_blob, am_blob);
+    Data_Get_Struct(self, libsql_ext_sqlite3_blob, libsql_ext_blob);
 
     /* we have to be exact on the number of bytes to read.  n + current_offset
      * cannot be larger than the blob's length
      */
-    if ( (n + am_blob->current_offset > am_blob->length)) {
-        n = am_blob->length - am_blob->current_offset;
+    if ( (n + libsql_ext_blob->current_offset > libsql_ext_blob->length)) {
+        n = libsql_ext_blob->length - libsql_ext_blob->current_offset;
     }
 
-    if ( am_blob->current_offset == am_blob->length ) {
+    if ( libsql_ext_blob->current_offset == libsql_ext_blob->length ) {
         return Qnil;
     }
 
     buf = (void *)malloc( n );
-    rc = sqlite3_blob_read( am_blob->blob, buf, n, am_blob->current_offset); 
+    rc = sqlite3_blob_read( libsql_ext_blob->blob, buf, n, libsql_ext_blob->current_offset); 
 
     if ( rc != SQLITE_OK ) {
-        rb_raise(eAS_Error, "Error reading %d bytes blob at offset %d: [SQLITE_ERROR %d] %s\n",
-                n, am_blob->current_offset, rc, sqlite3_errmsg( am_blob->db ));
+        rb_raise(eLS_Error, "Error reading %d bytes blob at offset %d: [SQLITE_ERROR %d] %s\n",
+                n, libsql_ext_blob->current_offset, rc, sqlite3_errmsg( libsql_ext_blob->db ));
     }
 
-    am_blob->current_offset += n;
+    libsql_ext_blob->current_offset += n;
 
     result = rb_str_new( (char*)buf, n );
     free( buf );
@@ -156,28 +156,28 @@ VALUE am_sqlite3_blob_read( VALUE self, VALUE length )
  * of bytes written.
  *
  */
-VALUE am_sqlite3_blob_write( VALUE self, VALUE buf )
+VALUE libsql_ext_sqlite3_blob_write( VALUE self, VALUE buf )
 {
-    am_sqlite3_blob *am_blob;
+    libsql_ext_sqlite3_blob *libsql_ext_blob;
     int              rc;
     VALUE            str = StringValue( buf );
     int              n   = (int)RSTRING_LEN( str );
     char            *chk_buf = NULL;
 
-    Data_Get_Struct(self, am_sqlite3_blob, am_blob);
+    Data_Get_Struct(self, libsql_ext_sqlite3_blob, libsql_ext_blob);
 
-    rc = sqlite3_blob_write( am_blob->blob, RSTRING_PTR(str), n, am_blob->current_offset); 
+    rc = sqlite3_blob_write( libsql_ext_blob->blob, RSTRING_PTR(str), n, libsql_ext_blob->current_offset); 
 
     if ( rc  != SQLITE_OK ) {
-        rb_raise(eAS_Error, "Error writing %d bytes blob at offset %d: [SQLITE_ERROR %d] %s\n",
-                n, am_blob->current_offset, rc, sqlite3_errmsg( am_blob->db ));
+        rb_raise(eLS_Error, "Error writing %d bytes blob at offset %d: [SQLITE_ERROR %d] %s\n",
+                n, libsql_ext_blob->current_offset, rc, sqlite3_errmsg( libsql_ext_blob->db ));
     }
 
     chk_buf = (char *) malloc( n  + 1);
     chk_buf[n] = '\0';
-    sqlite3_blob_read( am_blob->blob, chk_buf, n, 0);
+    sqlite3_blob_read( libsql_ext_blob->blob, chk_buf, n, 0);
 
-    am_blob->current_offset += n;
+    libsql_ext_blob->current_offset += n;
 
     return INT2FIX( n );
 
@@ -189,25 +189,25 @@ VALUE am_sqlite3_blob_write( VALUE self, VALUE buf )
  ***********************************************************************/
 
 /*
- * garbage collector free method for the am_sqlite3_blob structure
+ * garbage collector free method for the libsql_ext_sqlite3_blob structure
  */
-void am_sqlite3_blob_free(am_sqlite3_blob* wrapper)
+void libsql_ext_sqlite3_blob_free(libsql_ext_sqlite3_blob* wrapper)
 {
     free(wrapper);
     return;
 }
 
 /*
- * allocate the am_blob structure
+ * allocate the libsql_ext_blob structure
  */
-VALUE am_sqlite3_blob_alloc(VALUE klass)
+VALUE libsql_ext_sqlite3_blob_alloc(VALUE klass)
 {
-    am_sqlite3_blob  *wrapper = ALLOC( am_sqlite3_blob );
+    libsql_ext_sqlite3_blob  *wrapper = ALLOC( libsql_ext_sqlite3_blob );
     VALUE             obj     ; 
 
     wrapper->current_offset = 0;
     wrapper->db             = NULL;
-    obj = Data_Wrap_Struct(klass, NULL, am_sqlite3_blob_free, wrapper);
+    obj = Data_Wrap_Struct(klass, NULL, libsql_ext_sqlite3_blob_free, wrapper);
     return obj;
 }
 
@@ -228,13 +228,13 @@ void Init_libsql_ext_blob( )
     /*
      * Encapsulate the SQLite3 Statement handle in a class
      */
-    cAS_Blob = rb_define_class_under( mas, "Blob", rb_cObject ); 
-    rb_define_alloc_func(cAS_Blob, am_sqlite3_blob_alloc); 
-    rb_define_method(cAS_Blob, "initialize", am_sqlite3_blob_initialize, 6); 
-    rb_define_method(cAS_Blob, "close", am_sqlite3_blob_close, 0); 
-    rb_define_method(cAS_Blob, "read", am_sqlite3_blob_read, 1); 
-    rb_define_method(cAS_Blob, "write", am_sqlite3_blob_write, 1); 
-    rb_define_method(cAS_Blob, "length", am_sqlite3_blob_length, 0); 
+    cLS_Blob = rb_define_class_under( mas, "Blob", rb_cObject ); 
+    rb_define_alloc_func(cLS_Blob, libsql_ext_sqlite3_blob_alloc); 
+    rb_define_method(cLS_Blob, "initialize", libsql_ext_sqlite3_blob_initialize, 6); 
+    rb_define_method(cLS_Blob, "close", libsql_ext_sqlite3_blob_close, 0); 
+    rb_define_method(cLS_Blob, "read", libsql_ext_sqlite3_blob_read, 1); 
+    rb_define_method(cLS_Blob, "write", libsql_ext_sqlite3_blob_write, 1); 
+    rb_define_method(cLS_Blob, "length", libsql_ext_sqlite3_blob_length, 0); 
 }
 
 

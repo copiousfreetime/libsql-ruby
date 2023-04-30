@@ -6,8 +6,8 @@
  * vim: shiftwidth=4
  */
 
-VALUE cAS_Database;       /* class  Libsql::SQLite3::Database        */
-VALUE cAS_Database_Stat;  /* class  Libsql::SQLite3::Database::Stat  */
+VALUE cLS_Database;       /* class  Libsql::SQLite3::Database        */
+VALUE cLS_Database_Stat;  /* class  Libsql::SQLite3::Database::Stat  */
 
 /**
  * Document-method: open
@@ -18,15 +18,15 @@ VALUE cAS_Database_Stat;  /* class  Libsql::SQLite3::Database::Stat  */
  * Create a new SQLite2 database with a UTF-8 encoding.
  *
  */
-VALUE am_sqlite3_database_open(int argc, VALUE *argv, VALUE class)
+VALUE libsql_ext_sqlite3_database_open(int argc, VALUE *argv, VALUE class)
 {
-    VALUE  self = am_sqlite3_database_alloc(class);
+    VALUE  self = libsql_ext_sqlite3_database_alloc(class);
     VALUE  rFlags;
     VALUE  rFilename;
     int     flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
     char*   filename;
     int     rc;
-    am_sqlite3* am_db;
+    libsql_ext_sqlite3* libsql_ext_db;
 
     /* at least a filename argument is required */
     rb_scan_args( argc, argv, "11", &rFilename, &rFlags );
@@ -36,20 +36,20 @@ VALUE am_sqlite3_database_open(int argc, VALUE *argv, VALUE class)
     filename = StringValuePtr(rFilename);
 
     /* extract the sqlite3 wrapper struct */
-    Data_Get_Struct(self, am_sqlite3, am_db);
+    Data_Get_Struct(self, libsql_ext_sqlite3, libsql_ext_db);
 
     /* open the sqlite3 database */
-    rc = sqlite3_open_v2( filename, &(am_db->db), flags, 0);
+    rc = sqlite3_open_v2( filename, &(libsql_ext_db->db), flags, 0);
     if ( SQLITE_OK != rc ) {
-        rb_raise(eAS_Error, "Failure to open database %s : [SQLITE_ERROR %d] : %s\n",
-                filename, rc, sqlite3_errmsg(am_db->db));
+        rb_raise(eLS_Error, "Failure to open database %s : [SQLITE_ERROR %d] : %s\n",
+                filename, rc, sqlite3_errmsg(libsql_ext_db->db));
     }
 
     /* by default turn on the extended result codes */
-    rc = sqlite3_extended_result_codes( am_db->db, 1);
+    rc = sqlite3_extended_result_codes( libsql_ext_db->db, 1);
     if ( SQLITE_OK != rc ) {
-        rb_raise(eAS_Error, "Failure to set extended result codes %s : [SQLITE_ERROR %d] : %s\n",
-                filename, rc, sqlite3_errmsg(am_db->db));
+        rb_raise(eLS_Error, "Failure to set extended result codes %s : [SQLITE_ERROR %d] : %s\n",
+                filename, rc, sqlite3_errmsg(libsql_ext_db->db));
     }
 
     return self;
@@ -62,25 +62,25 @@ VALUE am_sqlite3_database_open(int argc, VALUE *argv, VALUE class)
  * Create a new SQLite3 database with a UTF-16 encoding
  *
  */
-VALUE am_sqlite3_database_open16(VALUE class, VALUE rFilename)
+VALUE libsql_ext_sqlite3_database_open16(VALUE class, VALUE rFilename)
 {
-    VALUE       self = am_sqlite3_database_alloc(class);
+    VALUE       self = libsql_ext_sqlite3_database_alloc(class);
     char*       filename = StringValuePtr(rFilename);
-    am_sqlite3* am_db;
+    libsql_ext_sqlite3* libsql_ext_db;
     int         rc;
 
-    Data_Get_Struct(self, am_sqlite3, am_db);
-    rc = sqlite3_open16( filename, &(am_db->db) );
+    Data_Get_Struct(self, libsql_ext_sqlite3, libsql_ext_db);
+    rc = sqlite3_open16( filename, &(libsql_ext_db->db) );
     if ( SQLITE_OK != rc ) {
-        rb_raise(eAS_Error, "Failure to open UTF-16 database %s : [SQLITE_ERROR %d] : %s\n",
-                filename, rc, sqlite3_errmsg( am_db->db ));
+        rb_raise(eLS_Error, "Failure to open UTF-16 database %s : [SQLITE_ERROR %d] : %s\n",
+                filename, rc, sqlite3_errmsg( libsql_ext_db->db ));
     }
 
     /* by default turn on the extended result codes */
-    rc = sqlite3_extended_result_codes( am_db->db, 1);
+    rc = sqlite3_extended_result_codes( libsql_ext_db->db, 1);
     if ( SQLITE_OK != rc ) {
-        rb_raise(eAS_Error, "Failure to set extended result codes on UTF-16 database %s : [SQLITE_ERROR %d] : %s\n",
-                filename, rc, (char*)sqlite3_errmsg16(am_db->db));
+        rb_raise(eLS_Error, "Failure to set extended result codes on UTF-16 database %s : [SQLITE_ERROR %d] : %s\n",
+                filename, rc, (char*)sqlite3_errmsg16(libsql_ext_db->db));
     }
 
     return self;
@@ -92,17 +92,17 @@ VALUE am_sqlite3_database_open16(VALUE class, VALUE rFilename)
  *
  * Close the database
  */
-VALUE am_sqlite3_database_close(VALUE self)
+VALUE libsql_ext_sqlite3_database_close(VALUE self)
 {
-    am_sqlite3   *am_db;
+    libsql_ext_sqlite3   *libsql_ext_db;
     int           rc = 0;
 
-    Data_Get_Struct(self, am_sqlite3, am_db);
-    rc = sqlite3_close( am_db->db );
-    am_db->db = NULL;
+    Data_Get_Struct(self, libsql_ext_sqlite3, libsql_ext_db);
+    rc = sqlite3_close( libsql_ext_db->db );
+    libsql_ext_db->db = NULL;
     if ( SQLITE_OK != rc ) {
-        rb_raise(eAS_Error, "Failure to close database : [SQLITE_ERROR %d] : %s\n",
-                rc, sqlite3_errmsg( am_db->db ));
+        rb_raise(eLS_Error, "Failure to close database : [SQLITE_ERROR %d] : %s\n",
+                rc, sqlite3_errmsg( libsql_ext_db->db ));
     }
 
     return self;
@@ -116,13 +116,13 @@ VALUE am_sqlite3_database_close(VALUE self)
  * Return the rowid of the last row inserted into the database from this
  * database connection.
  */
-VALUE am_sqlite3_database_last_insert_rowid(VALUE self)
+VALUE libsql_ext_sqlite3_database_last_insert_rowid(VALUE self)
 {
-    am_sqlite3   *am_db;
+    libsql_ext_sqlite3   *libsql_ext_db;
     sqlite3_int64 last_id;
 
-    Data_Get_Struct(self, am_sqlite3, am_db);
-    last_id = sqlite3_last_insert_rowid( am_db->db );
+    Data_Get_Struct(self, libsql_ext_sqlite3, libsql_ext_db);
+    last_id = sqlite3_last_insert_rowid( libsql_ext_db->db );
 
     return SQLINT64_2NUM( last_id );
 }
@@ -134,13 +134,13 @@ VALUE am_sqlite3_database_last_insert_rowid(VALUE self)
  * return true if the database is in autocommit mode, otherwise return false
  *
  */
-VALUE am_sqlite3_database_is_autocommit(VALUE self)
+VALUE libsql_ext_sqlite3_database_is_autocommit(VALUE self)
 {
-    am_sqlite3   *am_db;
+    libsql_ext_sqlite3   *libsql_ext_db;
     int           rc;
 
-    Data_Get_Struct(self, am_sqlite3, am_db);
-    rc = sqlite3_get_autocommit( am_db->db );
+    Data_Get_Struct(self, libsql_ext_sqlite3, libsql_ext_db);
+    rc = sqlite3_get_autocommit( libsql_ext_db->db );
 
     return ( 0 == rc ) ? Qfalse : Qtrue ;
 }
@@ -153,13 +153,13 @@ VALUE am_sqlite3_database_is_autocommit(VALUE self)
  * DELETE statement.
  *
  */
-VALUE am_sqlite3_database_row_changes(VALUE self)
+VALUE libsql_ext_sqlite3_database_row_changes(VALUE self)
 {
-    am_sqlite3   *am_db;
+    libsql_ext_sqlite3   *libsql_ext_db;
     int           rc;
 
-    Data_Get_Struct(self, am_sqlite3, am_db);
-    rc = sqlite3_changes( am_db->db );
+    Data_Get_Struct(self, libsql_ext_sqlite3, libsql_ext_db);
+    rc = sqlite3_changes( libsql_ext_db->db );
 
     return INT2FIX(rc);
 }
@@ -171,13 +171,13 @@ VALUE am_sqlite3_database_row_changes(VALUE self)
  * return the last error code that happened in the database
  *
  */
-VALUE am_sqlite3_database_last_error_code(VALUE self)
+VALUE libsql_ext_sqlite3_database_last_error_code(VALUE self)
 {
-    am_sqlite3   *am_db;
+    libsql_ext_sqlite3   *libsql_ext_db;
     int           code;
 
-    Data_Get_Struct(self, am_sqlite3, am_db);
-    code = sqlite3_errcode( am_db->db );
+    Data_Get_Struct(self, libsql_ext_sqlite3, libsql_ext_db);
+    code = sqlite3_errcode( libsql_ext_db->db );
 
     return INT2FIX( code );
 }
@@ -189,13 +189,13 @@ VALUE am_sqlite3_database_last_error_code(VALUE self)
  * return the last error message that happened in the database
  *
  */
-VALUE am_sqlite3_database_last_error_message(VALUE self)
+VALUE libsql_ext_sqlite3_database_last_error_message(VALUE self)
 {
-    am_sqlite3   *am_db;
+    libsql_ext_sqlite3   *libsql_ext_db;
     const char   *message;
 
-    Data_Get_Struct(self, am_sqlite3, am_db);
-    message = sqlite3_errmsg( am_db->db );
+    Data_Get_Struct(self, libsql_ext_sqlite3, libsql_ext_db);
+    message = sqlite3_errmsg( libsql_ext_db->db );
 
     return rb_str_new2( message );
 }
@@ -208,13 +208,13 @@ VALUE am_sqlite3_database_last_error_message(VALUE self)
  * in the database connection since the connection was opened.
  *
  */
-VALUE am_sqlite3_database_total_changes(VALUE self)
+VALUE libsql_ext_sqlite3_database_total_changes(VALUE self)
 {
-    am_sqlite3   *am_db;
+    libsql_ext_sqlite3   *libsql_ext_db;
     int           rc;
 
-    Data_Get_Struct(self, am_sqlite3, am_db);
-    rc = sqlite3_total_changes( am_db->db );
+    Data_Get_Struct(self, libsql_ext_sqlite3, libsql_ext_db);
+    rc = sqlite3_total_changes( libsql_ext_db->db );
 
     return INT2FIX(rc);
 }
@@ -228,7 +228,7 @@ VALUE am_sqlite3_database_total_changes(VALUE self)
  * If reset it true then the highwater mark for the stat is reset
  *
  */
-VALUE am_sqlite3_database_stat_update_bang( int argc, VALUE *argv, VALUE self )
+VALUE libsql_ext_sqlite3_database_stat_update_bang( int argc, VALUE *argv, VALUE self )
 {
     int current    = -1;
     int highwater  = -1;
@@ -236,24 +236,24 @@ VALUE am_sqlite3_database_stat_update_bang( int argc, VALUE *argv, VALUE self )
     int status_op  = FIX2INT( rb_iv_get( self, "@code" ) );
     int rc;
 
-    am_sqlite3    *am_db;
+    libsql_ext_sqlite3    *libsql_ext_db;
 
     VALUE reset    = Qfalse;
     VALUE db       = rb_iv_get( self, "@api_db" );
 
-    Data_Get_Struct(db, am_sqlite3, am_db);
+    Data_Get_Struct(db, libsql_ext_sqlite3, libsql_ext_db);
 
     if ( argc > 0 ) {
         reset = argv[0];
         reset_flag = ( Qtrue == reset ) ? 1 : 0 ;
     }
 
-    rc = sqlite3_db_status( am_db->db, status_op, &current, &highwater, reset_flag );
+    rc = sqlite3_db_status( libsql_ext_db->db, status_op, &current, &highwater, reset_flag );
 
     if ( SQLITE_OK != rc ) {
         VALUE n    = rb_iv_get( self, "@name");
         char* name = StringValuePtr( n );
-        rb_raise(eAS_Error, "Failure to retrieve database status for %s : [SQLITE_ERROR %d] \n", name, rc);
+        rb_raise(eLS_Error, "Failure to retrieve database status for %s : [SQLITE_ERROR %d] \n", name, rc);
     }
 
     rb_iv_set( self, "@current", INT2NUM( current ) );
@@ -270,31 +270,31 @@ VALUE am_sqlite3_database_stat_update_bang( int argc, VALUE *argv, VALUE self )
  *
  * Create a new SQLite3 statement.
  */
-VALUE am_sqlite3_database_prepare(VALUE self, VALUE rSQL)
+VALUE libsql_ext_sqlite3_database_prepare(VALUE self, VALUE rSQL)
 {
     VALUE            sql = StringValue( rSQL );
-    VALUE            stmt = am_sqlite3_statement_alloc(cAS_Statement);
-    am_sqlite3      *am_db;
-    am_sqlite3_stmt *am_stmt;
+    VALUE            stmt = libsql_ext_sqlite3_statement_alloc(cLS_Statement);
+    libsql_ext_sqlite3      *libsql_ext_db;
+    libsql_ext_sqlite3_stmt *libsql_ext_stmt;
     const char      *tail;
     int              rc;
 
-    Data_Get_Struct(self, am_sqlite3, am_db);
+    Data_Get_Struct(self, libsql_ext_sqlite3, libsql_ext_db);
 
-    Data_Get_Struct(stmt, am_sqlite3_stmt, am_stmt);
-    rc = sqlite3_prepare_v2( am_db->db, RSTRING_PTR(sql), (int)RSTRING_LEN(sql),
-                            &(am_stmt->stmt), &tail);
+    Data_Get_Struct(stmt, libsql_ext_sqlite3_stmt, libsql_ext_stmt);
+    rc = sqlite3_prepare_v2( libsql_ext_db->db, RSTRING_PTR(sql), (int)RSTRING_LEN(sql),
+                            &(libsql_ext_stmt->stmt), &tail);
     if ( SQLITE_OK != rc) {
-        rb_raise(eAS_Error, "Failure to prepare statement %s : [SQLITE_ERROR %d] : %s\n",
-                RSTRING_PTR(sql), rc, sqlite3_errmsg(am_db->db));
-        am_sqlite3_statement_free( am_stmt );
+        rb_raise(eLS_Error, "Failure to prepare statement %s : [SQLITE_ERROR %d] : %s\n",
+                RSTRING_PTR(sql), rc, sqlite3_errmsg(libsql_ext_db->db));
+        libsql_ext_sqlite3_statement_free( libsql_ext_stmt );
     }
 
     if ( tail != NULL ) {
-        am_stmt->remaining_sql = rb_str_new2( tail );
-        rb_gc_register_address( &(am_stmt->remaining_sql) );
+        libsql_ext_stmt->remaining_sql = rb_str_new2( tail );
+        rb_gc_register_address( &(libsql_ext_stmt->remaining_sql) );
     } else {
-        am_stmt->remaining_sql = Qnil;
+        libsql_ext_stmt->remaining_sql = Qnil;
     }
 
     return stmt;
@@ -307,19 +307,19 @@ VALUE am_sqlite3_database_prepare(VALUE self, VALUE rSQL)
  *
  * Execute the statements in a batch.
  */
-VALUE am_sqlite3_database_exec(VALUE self, VALUE rSQL)
+VALUE libsql_ext_sqlite3_database_exec(VALUE self, VALUE rSQL)
 {
   VALUE        sql = StringValue( rSQL );
-  am_sqlite3  *am_db;
+  libsql_ext_sqlite3  *libsql_ext_db;
   int          rc;
 
-  Data_Get_Struct(self, am_sqlite3, am_db);
+  Data_Get_Struct(self, libsql_ext_sqlite3, libsql_ext_db);
   
-  rc = sqlite3_exec( am_db->db, RSTRING_PTR(sql), NULL, NULL, NULL );
+  rc = sqlite3_exec( libsql_ext_db->db, RSTRING_PTR(sql), NULL, NULL, NULL );
 
   if ( SQLITE_OK != rc ){
-    rb_raise( eAS_Error, "Failed to execute bulk statements: [SQLITE_ERROR %d] : %s\n",
-	      rc, sqlite3_errmsg(am_db->db));
+    rb_raise( eLS_Error, "Failed to execute bulk statements: [SQLITE_ERROR %d] : %s\n",
+	      rc, sqlite3_errmsg(libsql_ext_db->db));
   }
 
   /* Presume that nobody will want to batch execute
@@ -397,30 +397,30 @@ int libsql_ext_xTraceCallback(unsigned trace_type, void* tap, void* prepared_sta
  * This is an experimental api and is subject to change, or removal.
  *
  */
-VALUE am_sqlite3_database_register_trace_tap(VALUE self, VALUE tap )
+VALUE libsql_ext_sqlite3_database_register_trace_tap(VALUE self, VALUE tap )
 {
-    am_sqlite3   *am_db;
+    libsql_ext_sqlite3   *libsql_ext_db;
 
-    Data_Get_Struct(self, am_sqlite3, am_db);
+    Data_Get_Struct(self, libsql_ext_sqlite3, libsql_ext_db);
 
     /* Qnil, unregister the item and tell the garbage collector we are done with
      * it.
      */
     if ( Qnil == tap ) {
 
-        sqlite3_trace_v2( am_db->db, 0, NULL, NULL );
-        rb_gc_unregister_address( &(am_db->trace_obj) );
-        am_db->trace_obj = Qnil;
+        sqlite3_trace_v2( libsql_ext_db->db, 0, NULL, NULL );
+        rb_gc_unregister_address( &(libsql_ext_db->trace_obj) );
+        libsql_ext_db->trace_obj = Qnil;
 
-    /* register the item and store the reference to the object in the am_db
+    /* register the item and store the reference to the object in the libsql_ext_db
      * structure.  We also have to tell the Ruby garbage collector that we
      * point to the Ruby object from C.
      */
     } else {
 
-        am_db->trace_obj = tap;
-        rb_gc_register_address( &(am_db->trace_obj) );
-        sqlite3_trace_v2( am_db->db, SQLITE_TRACE_STMT | SQLITE_TRACE_PROFILE, libsql_ext_xTraceCallback, (void *)am_db->trace_obj );
+        libsql_ext_db->trace_obj = tap;
+        rb_gc_register_address( &(libsql_ext_db->trace_obj) );
+        sqlite3_trace_v2( libsql_ext_db->db, SQLITE_TRACE_STMT | SQLITE_TRACE_PROFILE, libsql_ext_xTraceCallback, (void *)libsql_ext_db->trace_obj );
     }
 
     return Qnil;
@@ -431,7 +431,7 @@ VALUE am_sqlite3_database_register_trace_tap(VALUE self, VALUE tap )
  */
 VALUE libsql_ext_wrap_funcall2( VALUE arg )
 {
-    am_protected_t *protected = (am_protected_t*) arg;
+    libsql_ext_protected_t *protected = (libsql_ext_protected_t*) arg;
     return rb_funcall2( protected->instance, protected->method, protected->argc, protected->argv );
 }
 
@@ -511,7 +511,7 @@ int libsql_ext_xBusy( void *pArg , int nArg)
     VALUE          result = Qnil;
     int            state;
     int            busy = 1;
-    am_protected_t protected;
+    libsql_ext_protected_t protected;
 
     args[0] = INT2FIX(nArg);
 
@@ -536,23 +536,23 @@ int libsql_ext_xBusy( void *pArg , int nArg)
  * handler is removed.  Otherwise the argument is registered as the busy
  * handler.
  */
-VALUE am_sqlite3_database_busy_handler( VALUE self, VALUE handler )
+VALUE libsql_ext_sqlite3_database_busy_handler( VALUE self, VALUE handler )
 {
-    am_sqlite3   *am_db;
+    libsql_ext_sqlite3   *libsql_ext_db;
     int           rc;
 
-    Data_Get_Struct(self, am_sqlite3, am_db);
+    Data_Get_Struct(self, libsql_ext_sqlite3, libsql_ext_db);
 
     /* Removing a busy handler case, remove it from sqlite and then remove it
      * from the garbage collector if it existed */
     if ( Qnil == handler ) {
-        rc = sqlite3_busy_handler( am_db->db, NULL, NULL );
+        rc = sqlite3_busy_handler( libsql_ext_db->db, NULL, NULL );
         if ( SQLITE_OK != rc ) {
-            rb_raise(eAS_Error, "Failure removing busy handler : [SQLITE_ERROR %d] : %s\n", 
-                    rc, sqlite3_errmsg( am_db->db ));
+            rb_raise(eLS_Error, "Failure removing busy handler : [SQLITE_ERROR %d] : %s\n", 
+                    rc, sqlite3_errmsg( libsql_ext_db->db ));
         }
-        if ( Qnil != am_db->busy_handler_obj ) {
-            rb_gc_unregister_address( &(am_db->busy_handler_obj) );
+        if ( Qnil != libsql_ext_db->busy_handler_obj ) {
+            rb_gc_unregister_address( &(libsql_ext_db->busy_handler_obj) );
         }
     } else {
         /* installing a busy handler
@@ -560,13 +560,13 @@ VALUE am_sqlite3_database_busy_handler( VALUE self, VALUE handler )
          * - keep a reference for ourselves with our database handle
          * - registere the handler reference with the garbage collector
          */
-        rc = sqlite3_busy_handler( am_db->db, libsql_ext_xBusy, (void*)handler );
+        rc = sqlite3_busy_handler( libsql_ext_db->db, libsql_ext_xBusy, (void*)handler );
         if ( SQLITE_OK != rc ) {
-            rb_raise(eAS_Error, "Failure setting busy handler : [SQLITE_ERROR %d] : %s\n", 
-                    rc, sqlite3_errmsg( am_db->db ));
+            rb_raise(eLS_Error, "Failure setting busy handler : [SQLITE_ERROR %d] : %s\n", 
+                    rc, sqlite3_errmsg( libsql_ext_db->db ));
         }
-        am_db->busy_handler_obj = handler;
-        rb_gc_register_address( &(am_db->busy_handler_obj) );
+        libsql_ext_db->busy_handler_obj = handler;
+        rb_gc_register_address( &(libsql_ext_db->busy_handler_obj) );
     }
     return Qnil;
 }
@@ -584,7 +584,7 @@ int libsql_ext_xProgress( void *pArg )
     VALUE          result = Qnil;
     int            state;
     int            cancel = 0;
-    am_protected_t protected;
+    libsql_ext_protected_t protected;
 
     protected.instance = (VALUE)pArg;
     protected.method   = rb_intern("call");
@@ -607,18 +607,18 @@ int libsql_ext_xProgress( void *pArg )
  * progress handler is removed.  Otherwise the argument is registered as the
  * progress handler.
  */
-VALUE am_sqlite3_database_progress_handler( VALUE self, VALUE op_count, VALUE handler )
+VALUE libsql_ext_sqlite3_database_progress_handler( VALUE self, VALUE op_count, VALUE handler )
 {
-    am_sqlite3   *am_db;
+    libsql_ext_sqlite3   *libsql_ext_db;
 
-    Data_Get_Struct(self, am_sqlite3, am_db);
+    Data_Get_Struct(self, libsql_ext_sqlite3, libsql_ext_db);
 
     /* Removing a progress handler, remove it from sqlite and then remove it
      * from the garbage collector if it existed */
     if ( Qnil == handler ) {
-        sqlite3_progress_handler( am_db->db, -1, NULL, (void*)NULL );
-        if ( Qnil != am_db->progress_handler_obj ) {
-            rb_gc_unregister_address( &(am_db->progress_handler_obj) );
+        sqlite3_progress_handler( libsql_ext_db->db, -1, NULL, (void*)NULL );
+        if ( Qnil != libsql_ext_db->progress_handler_obj ) {
+            rb_gc_unregister_address( &(libsql_ext_db->progress_handler_obj) );
         }
     } else {
         int  op_codes = FIX2INT( op_count );
@@ -627,9 +627,9 @@ VALUE am_sqlite3_database_progress_handler( VALUE self, VALUE op_count, VALUE ha
          * - keep a reference for ourselves with our database handle
          * - register the handler reference with the garbage collector
          */
-        sqlite3_progress_handler( am_db->db, op_codes, libsql_ext_xProgress, (void*)handler );
-        am_db->progress_handler_obj = handler;
-        rb_gc_register_address( &(am_db->progress_handler_obj) );
+        sqlite3_progress_handler( libsql_ext_db->db, op_codes, libsql_ext_xProgress, (void*)handler );
+        libsql_ext_db->progress_handler_obj = handler;
+        rb_gc_register_address( &(libsql_ext_db->progress_handler_obj) );
     }
     return Qnil;
 }
@@ -648,7 +648,7 @@ void libsql_ext_xFunc( sqlite3_context* context, int argc, sqlite3_value** argv 
     VALUE          result;
     int            state;
     int            i;
-    am_protected_t protected;
+    libsql_ext_protected_t protected;
 
     /* convert each item in argv to a VALUE object based upon its type via
      * sqlite3_value_type( argv[n] )
@@ -681,16 +681,16 @@ void libsql_ext_xFunc( sqlite3_context* context, int argc, sqlite3_value** argv 
  *
  * register the given function to be invoked as an sql function.
  */
-VALUE am_sqlite3_database_define_function( VALUE self, VALUE name, VALUE proc_like )
+VALUE libsql_ext_sqlite3_database_define_function( VALUE self, VALUE name, VALUE proc_like )
 {
-    am_sqlite3   *am_db;
+    libsql_ext_sqlite3   *libsql_ext_db;
     int           rc;
     VALUE         arity = rb_funcall( proc_like, rb_intern( "arity" ), 0 );
     char*         zFunctionName = RSTRING_PTR(name);
     int           nArg = FIX2INT( arity );
 
-    Data_Get_Struct(self, am_sqlite3, am_db);
-    rc = sqlite3_create_function( am_db->db,
+    Data_Get_Struct(self, libsql_ext_sqlite3, libsql_ext_db);
+    rc = sqlite3_create_function( libsql_ext_db->db,
                                   zFunctionName, nArg,
                                   SQLITE_UTF8,
                                   (void *)proc_like, libsql_ext_xFunc,
@@ -705,11 +705,11 @@ VALUE am_sqlite3_database_define_function( VALUE self, VALUE name, VALUE proc_li
          * parameters.
          */
        if ( SQLITE_MISUSE == rc ) { 
-         rb_raise(eAS_Error, "Failure defining SQL function '%s' with arity '%d' : [SQLITE_ERROR %d] : Library used incorrectly\n",
+         rb_raise(eLS_Error, "Failure defining SQL function '%s' with arity '%d' : [SQLITE_ERROR %d] : Library used incorrectly\n",
                 zFunctionName, nArg, rc);
        } else {
-         rb_raise(eAS_Error, "Failure defining SQL function '%s' with arity '%d' : [SQLITE_ERROR %d] : %s\n",
-                zFunctionName, nArg, rc, sqlite3_errmsg( am_db->db ));
+         rb_raise(eLS_Error, "Failure defining SQL function '%s' with arity '%d' : [SQLITE_ERROR %d] : %s\n",
+                zFunctionName, nArg, rc, sqlite3_errmsg( libsql_ext_db->db ));
        }
     }
     rb_gc_register_address( &proc_like );
@@ -722,23 +722,23 @@ VALUE am_sqlite3_database_define_function( VALUE self, VALUE name, VALUE proc_li
  *
  * remove the given function from availability in SQL.
  */
-VALUE am_sqlite3_database_remove_function( VALUE self, VALUE name, VALUE proc_like )
+VALUE libsql_ext_sqlite3_database_remove_function( VALUE self, VALUE name, VALUE proc_like )
 {
-    am_sqlite3    *am_db;
+    libsql_ext_sqlite3    *libsql_ext_db;
     int            rc;
     VALUE         arity = rb_funcall( proc_like, rb_intern( "arity" ), 0 );
     char*         zFunctionName = RSTRING_PTR(name);
     int           nArg = FIX2INT( arity );
 
-    Data_Get_Struct(self, am_sqlite3, am_db);
-    rc = sqlite3_create_function( am_db->db,
+    Data_Get_Struct(self, libsql_ext_sqlite3, libsql_ext_db);
+    rc = sqlite3_create_function( libsql_ext_db->db,
                                   zFunctionName, nArg,
                                   SQLITE_UTF8,
                                   NULL, NULL,
                                   NULL, NULL);
     if ( SQLITE_OK != rc ) {
-       rb_raise(eAS_Error, "Failure removing SQL function '%s' with arity '%d' : [SQLITE_ERROR %d] : %s\n",
-                zFunctionName, nArg, rc, sqlite3_errmsg( am_db->db ));
+       rb_raise(eLS_Error, "Failure removing SQL function '%s' with arity '%d' : [SQLITE_ERROR %d] : %s\n",
+                zFunctionName, nArg, rc, sqlite3_errmsg( libsql_ext_db->db ));
     }
     rb_gc_unregister_address( &proc_like );
     return Qnil;
@@ -764,7 +764,7 @@ void libsql_ext_xStep( sqlite3_context* context, int argc, sqlite3_value** argv 
     VALUE          result;
     int            state;
     int            i;
-    am_protected_t protected;
+    libsql_ext_protected_t protected;
     VALUE         *aggregate_context = (VALUE*)sqlite3_aggregate_context( context, sizeof( VALUE ) );
 
     if ( 0 == aggregate_context ) {
@@ -834,7 +834,7 @@ void libsql_ext_xFinal( sqlite3_context* context )
 {
     VALUE          result;
     int            state;
-    am_protected_t protected;
+    libsql_ext_protected_t protected;
     VALUE          exception = Qnil;
     VALUE         *aggregate_context = (VALUE*)sqlite3_aggregate_context( context, sizeof( VALUE ) );
 
@@ -895,15 +895,15 @@ void libsql_ext_xFinal( sqlite3_context* context )
  *
  * register the given klass to be invoked as an sql aggregate.
  */
-VALUE am_sqlite3_database_define_aggregate( VALUE self, VALUE name, VALUE arity, VALUE klass )
+VALUE libsql_ext_sqlite3_database_define_aggregate( VALUE self, VALUE name, VALUE arity, VALUE klass )
 {
-    am_sqlite3   *am_db;
+    libsql_ext_sqlite3   *libsql_ext_db;
     int           rc;
     char*         zFunctionName = RSTRING_PTR(name);
     int           nArg = FIX2INT( arity );
 
-    Data_Get_Struct(self, am_sqlite3, am_db);
-    rc = sqlite3_create_function( am_db->db,
+    Data_Get_Struct(self, libsql_ext_sqlite3, libsql_ext_db);
+    rc = sqlite3_create_function( libsql_ext_db->db,
                                   zFunctionName, nArg,
                                   SQLITE_UTF8,
                                   (void *)klass,
@@ -920,11 +920,11 @@ VALUE am_sqlite3_database_define_aggregate( VALUE self, VALUE name, VALUE arity,
          * parameters.
          */
        if ( SQLITE_MISUSE == rc ) { 
-         rb_raise(eAS_Error, "Failure defining SQL function '%s' with arity '%d' : [SQLITE_ERROR %d] : Library used incorrectly\n",
+         rb_raise(eLS_Error, "Failure defining SQL function '%s' with arity '%d' : [SQLITE_ERROR %d] : Library used incorrectly\n",
                 zFunctionName, nArg, rc);
        } else {
-         rb_raise(eAS_Error, "Failure defining SQL function '%s' with arity '%d' : [SQLITE_ERROR %d] : %s\n",
-                zFunctionName, nArg, rc, sqlite3_errmsg( am_db->db ));
+         rb_raise(eLS_Error, "Failure defining SQL function '%s' with arity '%d' : [SQLITE_ERROR %d] : %s\n",
+                zFunctionName, nArg, rc, sqlite3_errmsg( libsql_ext_db->db ));
        }
     }
     rb_gc_register_address( &klass );
@@ -938,23 +938,23 @@ VALUE am_sqlite3_database_define_aggregate( VALUE self, VALUE name, VALUE arity,
  *
  * remove the given klass from availability in SQL as an aggregate.
  */
-VALUE am_sqlite3_database_remove_aggregate( VALUE self, VALUE name, VALUE arity, VALUE klass )
+VALUE libsql_ext_sqlite3_database_remove_aggregate( VALUE self, VALUE name, VALUE arity, VALUE klass )
 {
-    am_sqlite3    *am_db;
+    libsql_ext_sqlite3    *libsql_ext_db;
     int            rc;
     char*         zFunctionName = RSTRING_PTR(name);
     int           nArg = FIX2INT( arity );
 
-    Data_Get_Struct(self, am_sqlite3, am_db);
-    rc = sqlite3_create_function( am_db->db, 
+    Data_Get_Struct(self, libsql_ext_sqlite3, libsql_ext_db);
+    rc = sqlite3_create_function( libsql_ext_db->db, 
                                   zFunctionName, nArg,
                                   SQLITE_UTF8,
                                   NULL, NULL,
                                   NULL, 
                                   NULL);
     if ( SQLITE_OK != rc ) {
-       rb_raise(eAS_Error, "Failure removing SQL aggregate '%s' with arity '%d' : [SQLITE_ERROR %d] : %s\n",
-                zFunctionName, nArg, rc, sqlite3_errmsg( am_db->db ));
+       rb_raise(eLS_Error, "Failure removing SQL aggregate '%s' with arity '%d' : [SQLITE_ERROR %d] : %s\n",
+                zFunctionName, nArg, rc, sqlite3_errmsg( libsql_ext_db->db ));
     }
     rb_gc_unregister_address( &klass );
     return Qnil;
@@ -968,12 +968,12 @@ VALUE am_sqlite3_database_remove_aggregate( VALUE self, VALUE name, VALUE arity,
  * Cause another thread with a handle on this database to be interrupted and
  * return at the earliest opportunity as interrupted.
  */
-VALUE am_sqlite3_database_interrupt_bang( VALUE self )
+VALUE libsql_ext_sqlite3_database_interrupt_bang( VALUE self )
 {
-    am_sqlite3  *am_db;
+    libsql_ext_sqlite3  *libsql_ext_db;
 
-    Data_Get_Struct(self, am_sqlite3, am_db);
-    sqlite3_interrupt( am_db->db );
+    Data_Get_Struct(self, libsql_ext_sqlite3, libsql_ext_db);
+    sqlite3_interrupt( libsql_ext_db->db );
     return Qnil;
 }
 
@@ -985,10 +985,10 @@ VALUE am_sqlite3_database_interrupt_bang( VALUE self )
  * sqlite3_backup api
  *
  */
-VALUE am_sqlite3_database_replicate_to( VALUE self, VALUE other )
+VALUE libsql_ext_sqlite3_database_replicate_to( VALUE self, VALUE other )
 {
-    am_sqlite3  *am_src_db;
-    am_sqlite3  *am_dest_db;
+    libsql_ext_sqlite3  *libsql_ext_src_db;
+    libsql_ext_sqlite3  *libsql_ext_dest_db;
 
     sqlite3_backup *backup;
     sqlite3        *src;
@@ -998,16 +998,16 @@ VALUE am_sqlite3_database_replicate_to( VALUE self, VALUE other )
     int             rc_f;
 
     /* source database */
-    Data_Get_Struct(self, am_sqlite3, am_src_db);
-    src = am_src_db->db;
+    Data_Get_Struct(self, libsql_ext_sqlite3, libsql_ext_src_db);
+    src = libsql_ext_src_db->db;
 
     /* destination database */
-    Data_Get_Struct(other, am_sqlite3, am_dest_db);
-    dest = am_dest_db->db;
+    Data_Get_Struct(other, libsql_ext_sqlite3, libsql_ext_dest_db);
+    dest = libsql_ext_dest_db->db;
 
     backup = sqlite3_backup_init( dest, "main", src, "main" );
     if ( NULL == backup ) {
-        rb_raise(eAS_Error, "Failure to initialize replication:  [SQLITE_ERROR %d] : %s\n",
+        rb_raise(eLS_Error, "Failure to initialize replication:  [SQLITE_ERROR %d] : %s\n",
                  sqlite3_errcode( dest ), sqlite3_errmsg( dest ));
     }
 
@@ -1017,10 +1017,10 @@ VALUE am_sqlite3_database_replicate_to( VALUE self, VALUE other )
     /* report the rc_s error if that one is bad, 
      * else raise the rc_f error, or nothing */
     if ( SQLITE_DONE != rc_s ) {
-        rb_raise(eAS_Error, "Failure in replication : [SQLITE_ERROR %d] : %s\n",
+        rb_raise(eLS_Error, "Failure in replication : [SQLITE_ERROR %d] : %s\n",
                 sqlite3_errcode( dest ), sqlite3_errmsg( dest ) );
     } else if ( SQLITE_OK != rc_f ) {
-        rb_raise(eAS_Error, "Failure in finishing replication: [SQLITE_ERROR %d] : %s\n",
+        rb_raise(eLS_Error, "Failure in finishing replication: [SQLITE_ERROR %d] : %s\n",
                 sqlite3_errcode( dest ), sqlite3_errmsg( dest ) );
     } 
 
@@ -1041,9 +1041,9 @@ VALUE am_sqlite3_database_replicate_to( VALUE self, VALUE other )
  * auto_increment::           True if the column is AUTO INCREMENT
  *
  */
-VALUE am_sqlite3_database_table_column_metadata(VALUE self, VALUE db_name, VALUE tbl_name, VALUE col_name)
+VALUE libsql_ext_sqlite3_database_table_column_metadata(VALUE self, VALUE db_name, VALUE tbl_name, VALUE col_name)
 {
-    am_sqlite3  *am_db;
+    libsql_ext_sqlite3  *libsql_ext_db;
     int         rc;
 
     /* input */
@@ -1058,15 +1058,15 @@ VALUE am_sqlite3_database_table_column_metadata(VALUE self, VALUE db_name, VALUE
     VALUE       rHash      = rb_hash_new();
     VALUE       rStr       = Qnil;
 
-    Data_Get_Struct(self, am_sqlite3, am_db);
+    Data_Get_Struct(self, libsql_ext_sqlite3, libsql_ext_db);
 
-    rc = sqlite3_table_column_metadata( am_db->db,
+    rc = sqlite3_table_column_metadata( libsql_ext_db->db,
                                         zDbName, zTableName, zColumnName,
                                         &pzDataType, &pzCollSeq,
                                         &pNotNull, &pPrimaryKey, &pAutoinc);
     if ( SQLITE_OK != rc ) {
-       rb_raise(eAS_Error, "Failure retrieveing column meta data for table '%s' column '%s' : [SQLITE_ERROR %d] : %s\n",
-                zTableName, zColumnName, rc, sqlite3_errmsg( am_db-> db ));
+       rb_raise(eLS_Error, "Failure retrieveing column meta data for table '%s' column '%s' : [SQLITE_ERROR %d] : %s\n",
+                zTableName, zColumnName, rc, sqlite3_errmsg( libsql_ext_db-> db ));
 
     }
 
@@ -1089,51 +1089,51 @@ VALUE am_sqlite3_database_table_column_metadata(VALUE self, VALUE db_name, VALUE
 
 
 /*
- * garbage collector free method for the am_data structure.  Make sure to un
+ * garbage collector free method for the libsql_ext_data structure.  Make sure to un
  * register the trace and profile objects if they are not Qnil
  */
-void am_sqlite3_database_free(am_sqlite3* am_db)
+void libsql_ext_sqlite3_database_free(libsql_ext_sqlite3* libsql_ext_db)
 {
-    if ( Qnil != am_db->trace_obj ) {
-        rb_gc_unregister_address( &(am_db->trace_obj) );
-        am_db->trace_obj = Qnil;
+    if ( Qnil != libsql_ext_db->trace_obj ) {
+        rb_gc_unregister_address( &(libsql_ext_db->trace_obj) );
+        libsql_ext_db->trace_obj = Qnil;
     }
 
-    if ( Qnil != am_db->profile_obj) {
-        rb_gc_unregister_address( &(am_db->profile_obj) );
-        am_db->profile_obj = Qnil;
+    if ( Qnil != libsql_ext_db->profile_obj) {
+        rb_gc_unregister_address( &(libsql_ext_db->profile_obj) );
+        libsql_ext_db->profile_obj = Qnil;
     }
 
-    if ( Qnil != am_db->busy_handler_obj ) {
-        rb_gc_unregister_address( &(am_db->busy_handler_obj) );
-        am_db->busy_handler_obj = Qnil;
+    if ( Qnil != libsql_ext_db->busy_handler_obj ) {
+        rb_gc_unregister_address( &(libsql_ext_db->busy_handler_obj) );
+        libsql_ext_db->busy_handler_obj = Qnil;
     }
 
-    if ( Qnil != am_db->progress_handler_obj ) {
-        rb_gc_unregister_address( &(am_db->progress_handler_obj) );
-        am_db->progress_handler_obj = Qnil;
+    if ( Qnil != libsql_ext_db->progress_handler_obj ) {
+        rb_gc_unregister_address( &(libsql_ext_db->progress_handler_obj) );
+        libsql_ext_db->progress_handler_obj = Qnil;
     }
-    am_db->db = NULL;
+    libsql_ext_db->db = NULL;
 
-    free(am_db);
+    free(libsql_ext_db);
     return;
 }
 
 /*
- * allocate the am_data structure
+ * allocate the libsql_ext_data structure
  */
-VALUE am_sqlite3_database_alloc(VALUE klass)
+VALUE libsql_ext_sqlite3_database_alloc(VALUE klass)
 {
-    am_sqlite3*  am_db = ALLOC(am_sqlite3);
+    libsql_ext_sqlite3*  libsql_ext_db = ALLOC(libsql_ext_sqlite3);
     VALUE          obj ;
 
-    am_db->trace_obj            = Qnil;
-    am_db->profile_obj          = Qnil;
-    am_db->busy_handler_obj     = Qnil;
-    am_db->progress_handler_obj = Qnil;
-    am_db->db                   = NULL;
+    libsql_ext_db->trace_obj            = Qnil;
+    libsql_ext_db->profile_obj          = Qnil;
+    libsql_ext_db->busy_handler_obj     = Qnil;
+    libsql_ext_db->progress_handler_obj = Qnil;
+    libsql_ext_db->db                   = NULL;
 
-    obj = Data_Wrap_Struct(klass, NULL, am_sqlite3_database_free, am_db);
+    obj = Data_Wrap_Struct(klass, NULL, libsql_ext_sqlite3_database_free, libsql_ext_db);
     return obj;
 }
 
@@ -1152,37 +1152,37 @@ void Init_libsql_ext_database( )
     /*
      * Encapsulate an SQLite3 database
      */
-    cAS_Database = rb_define_class_under( mas, "Database", rb_cObject);
+    cLS_Database = rb_define_class_under( mas, "Database", rb_cObject);
 
-    rb_define_alloc_func(cAS_Database, am_sqlite3_database_alloc);
-    rb_define_singleton_method(cAS_Database, "open", am_sqlite3_database_open, -1);
-    rb_define_singleton_method(cAS_Database, "open16", am_sqlite3_database_open16, 1);
-    rb_define_method(cAS_Database, "prepare", am_sqlite3_database_prepare, 1);
-    rb_define_method(cAS_Database, "close", am_sqlite3_database_close, 0); /* in libsql_ext_database.c */
-    rb_define_method(cAS_Database, "last_insert_rowid", am_sqlite3_database_last_insert_rowid, 0); /* in libsql_ext_database.c */
-    rb_define_method(cAS_Database, "autocommit?", am_sqlite3_database_is_autocommit, 0); /* in libsql_ext_database.c */
-    rb_define_method(cAS_Database, "register_trace_tap", am_sqlite3_database_register_trace_tap, 1); /* in libsql_ext_database.c */
-    rb_define_method(cAS_Database, "table_column_metadata", am_sqlite3_database_table_column_metadata, 3); /* in libsql_ext_database.c */
-    rb_define_method(cAS_Database, "row_changes", am_sqlite3_database_row_changes, 0); /* in libsql_ext_database.c */
-    rb_define_method(cAS_Database, "total_changes", am_sqlite3_database_total_changes, 0); /* in libsql_ext_database.c */
-    rb_define_method(cAS_Database, "last_error_code", am_sqlite3_database_last_error_code, 0); /* in libsql_ext_database.c */
-    rb_define_method(cAS_Database, "last_error_message", am_sqlite3_database_last_error_message, 0); /* in libsql_ext_database.c */
-    rb_define_method(cAS_Database, "define_function", am_sqlite3_database_define_function, 2); /* in libsql_ext_database.c */
-    rb_define_method(cAS_Database, "remove_function", am_sqlite3_database_remove_function, 2); /* in libsql_ext_database.c */
-    rb_define_method(cAS_Database, "define_aggregate", am_sqlite3_database_define_aggregate, 3); /* in libsql_ext_database.c */
-    rb_define_method(cAS_Database, "remove_aggregate", am_sqlite3_database_remove_aggregate, 3); /* in libsql_ext_database.c */
-    rb_define_method(cAS_Database, "busy_handler", am_sqlite3_database_busy_handler, 1); /* in libsql_ext_database.c */
-    rb_define_method(cAS_Database, "progress_handler", am_sqlite3_database_progress_handler, 2); /* in libsql_ext_database.c */
-    rb_define_method(cAS_Database, "interrupt!", am_sqlite3_database_interrupt_bang, 0); /* in libsql_ext_database.c */
-    rb_define_method(cAS_Database, "replicate_to", am_sqlite3_database_replicate_to, 1); /* in libsql_ext_database.c */
-    rb_define_method(cAS_Database, "execute_batch", am_sqlite3_database_exec, 1); /* in libsql_ext_database.c */
+    rb_define_alloc_func(cLS_Database, libsql_ext_sqlite3_database_alloc);
+    rb_define_singleton_method(cLS_Database, "open", libsql_ext_sqlite3_database_open, -1);
+    rb_define_singleton_method(cLS_Database, "open16", libsql_ext_sqlite3_database_open16, 1);
+    rb_define_method(cLS_Database, "prepare", libsql_ext_sqlite3_database_prepare, 1);
+    rb_define_method(cLS_Database, "close", libsql_ext_sqlite3_database_close, 0); /* in libsql_ext_database.c */
+    rb_define_method(cLS_Database, "last_insert_rowid", libsql_ext_sqlite3_database_last_insert_rowid, 0); /* in libsql_ext_database.c */
+    rb_define_method(cLS_Database, "autocommit?", libsql_ext_sqlite3_database_is_autocommit, 0); /* in libsql_ext_database.c */
+    rb_define_method(cLS_Database, "register_trace_tap", libsql_ext_sqlite3_database_register_trace_tap, 1); /* in libsql_ext_database.c */
+    rb_define_method(cLS_Database, "table_column_metadata", libsql_ext_sqlite3_database_table_column_metadata, 3); /* in libsql_ext_database.c */
+    rb_define_method(cLS_Database, "row_changes", libsql_ext_sqlite3_database_row_changes, 0); /* in libsql_ext_database.c */
+    rb_define_method(cLS_Database, "total_changes", libsql_ext_sqlite3_database_total_changes, 0); /* in libsql_ext_database.c */
+    rb_define_method(cLS_Database, "last_error_code", libsql_ext_sqlite3_database_last_error_code, 0); /* in libsql_ext_database.c */
+    rb_define_method(cLS_Database, "last_error_message", libsql_ext_sqlite3_database_last_error_message, 0); /* in libsql_ext_database.c */
+    rb_define_method(cLS_Database, "define_function", libsql_ext_sqlite3_database_define_function, 2); /* in libsql_ext_database.c */
+    rb_define_method(cLS_Database, "remove_function", libsql_ext_sqlite3_database_remove_function, 2); /* in libsql_ext_database.c */
+    rb_define_method(cLS_Database, "define_aggregate", libsql_ext_sqlite3_database_define_aggregate, 3); /* in libsql_ext_database.c */
+    rb_define_method(cLS_Database, "remove_aggregate", libsql_ext_sqlite3_database_remove_aggregate, 3); /* in libsql_ext_database.c */
+    rb_define_method(cLS_Database, "busy_handler", libsql_ext_sqlite3_database_busy_handler, 1); /* in libsql_ext_database.c */
+    rb_define_method(cLS_Database, "progress_handler", libsql_ext_sqlite3_database_progress_handler, 2); /* in libsql_ext_database.c */
+    rb_define_method(cLS_Database, "interrupt!", libsql_ext_sqlite3_database_interrupt_bang, 0); /* in libsql_ext_database.c */
+    rb_define_method(cLS_Database, "replicate_to", libsql_ext_sqlite3_database_replicate_to, 1); /* in libsql_ext_database.c */
+    rb_define_method(cLS_Database, "execute_batch", libsql_ext_sqlite3_database_exec, 1); /* in libsql_ext_database.c */
 
 
     /*
      * Ecapuslate a SQLite3 Database stat
      */
-    cAS_Database_Stat = rb_define_class_under( cAS_Database, "Stat", rb_cObject );
-    rb_define_method(cAS_Database_Stat, "update!", am_sqlite3_database_stat_update_bang, -1); /* in libsql_ext_database.c */
+    cLS_Database_Stat = rb_define_class_under( cLS_Database, "Stat", rb_cObject );
+    rb_define_method(cLS_Database_Stat, "update!", libsql_ext_sqlite3_database_stat_update_bang, -1); /* in libsql_ext_database.c */
 
 }
 

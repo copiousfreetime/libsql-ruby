@@ -8,11 +8,11 @@
 #include "libsql_ext.h"
 
 /* Module and Classes */
-VALUE mA;              /* module Libsql                     */
-VALUE mAS;             /* module Libsql::SQLite3            */
-VALUE mASV;            /* module Libsql::SQLite3::Version   */
-VALUE eAS_Error;       /* class  Libsql::SQLite3::Error     */
-VALUE cAS_Stat;        /* class  Libsql::SQLite3::Stat      */
+VALUE mL;              /* module Libsql                     */
+VALUE mLS;             /* module Libsql::SQLite3            */
+VALUE mLSV;            /* module Libsql::SQLite3::Version   */
+VALUE eLS_Error;       /* class  Libsql::SQLite3::Error     */
+VALUE cLS_Stat;        /* class  Libsql::SQLite3::Stat      */
 
 /*----------------------------------------------------------------------
  * module methods for Libsql::SQLite3
@@ -27,7 +27,7 @@ VALUE cAS_Stat;        /* class  Libsql::SQLite3::Stat      */
  * That is threadsafe within the context of 'C' threads.
  *
  */
-VALUE am_sqlite3_threadsafe(VALUE self)
+VALUE libsql_ext_sqlite3_threadsafe(VALUE self)
 {
     if (sqlite3_threadsafe()) {
         return Qtrue;
@@ -44,7 +44,7 @@ VALUE am_sqlite3_threadsafe(VALUE self)
  * SQLite creates will be placed.  If _nil_ is returned, then SQLite will search
  * for an appropriate directory.
  */
-VALUE am_sqlite3_get_temp_directory( VALUE self )
+VALUE libsql_ext_sqlite3_get_temp_directory( VALUE self )
 {
     if (NULL == sqlite3_temp_directory) {
         return Qnil;
@@ -61,7 +61,7 @@ VALUE am_sqlite3_get_temp_directory( VALUE self )
  * It is not safe to set this value after a Database has been opened.
  *
  */
-VALUE am_sqlite3_set_temp_directory( VALUE self, VALUE new_dir )
+VALUE libsql_ext_sqlite3_set_temp_directory( VALUE self, VALUE new_dir )
 {
     char *p   = NULL ;
 
@@ -103,7 +103,7 @@ VALUE libsql_ext_format_string( const char* pattern, VALUE string )
  * Takes the input string and escapes each ' (single quote) character by
  * doubling it.
  */
-VALUE am_sqlite3_escape( VALUE self, VALUE string )
+VALUE libsql_ext_sqlite3_escape( VALUE self, VALUE string )
 { 
     return ( Qnil == string ) ? Qnil : libsql_ext_format_string( "%q", string );
 }
@@ -115,7 +115,7 @@ VALUE am_sqlite3_escape( VALUE self, VALUE string )
  * Takes the input string and surrounds it with single quotes, it also escapes
  * each embedded single quote with double quotes.
  */
-VALUE am_sqlite3_quote( VALUE self, VALUE string )
+VALUE libsql_ext_sqlite3_quote( VALUE self, VALUE string )
 {
     return ( Qnil == string ) ? Qnil : libsql_ext_format_string( "%Q", string );
 }
@@ -132,7 +132,7 @@ VALUE am_sqlite3_quote( VALUE self, VALUE string )
  * A complete statement must end with a semicolon.
  *
  */
-VALUE am_sqlite3_complete(VALUE self, VALUE args)
+VALUE libsql_ext_sqlite3_complete(VALUE self, VALUE args)
 {
     VALUE sql      = rb_ary_shift( args );
     VALUE opts     = rb_ary_shift( args );
@@ -161,7 +161,7 @@ VALUE am_sqlite3_complete(VALUE self, VALUE args)
  * the highwater mark for the stat is reset
  *
  */
-VALUE am_sqlite3_stat_update_bang( int argc, VALUE *argv, VALUE self )
+VALUE libsql_ext_sqlite3_stat_update_bang( int argc, VALUE *argv, VALUE self )
 {
     int status_op  = -1;
     int current    = -1;
@@ -181,7 +181,7 @@ VALUE am_sqlite3_stat_update_bang( int argc, VALUE *argv, VALUE self )
     if ( SQLITE_OK != rc ) {
         VALUE n    = rb_iv_get( self,  "@name" ) ;
         char* name = StringValuePtr( n );
-        rb_raise(eAS_Error, "Failure to retrieve status for %s : [SQLITE_ERROR %d] \n", name, rc);
+        rb_raise(eLS_Error, "Failure to retrieve status for %s : [SQLITE_ERROR %d] \n", name, rc);
     }
 
     rb_iv_set( self, "@current", INT2NUM( current ) );
@@ -197,7 +197,7 @@ VALUE am_sqlite3_stat_update_bang( int argc, VALUE *argv, VALUE self )
  * Generate N bytes of random data.
  *
  */
-VALUE am_sqlite3_randomness(VALUE self, VALUE num_bytes)
+VALUE libsql_ext_sqlite3_randomness(VALUE self, VALUE num_bytes)
 {
     int n     = NUM2INT(num_bytes);
     char *buf = ALLOCA_N(char, n);
@@ -217,7 +217,7 @@ VALUE am_sqlite3_randomness(VALUE self, VALUE num_bytes)
  * Return the SQLite C library version number as a string
  *
  */
-VALUE am_sqlite3_runtime_version(VALUE self)
+VALUE libsql_ext_sqlite3_runtime_version(VALUE self)
 {
     return rb_str_new2(sqlite3_libversion());
 }
@@ -229,7 +229,7 @@ VALUE am_sqlite3_runtime_version(VALUE self)
  * Return the SQLite C library version number as an integer
  *
  */
-VALUE am_sqlite3_runtime_version_number(VALUE self)
+VALUE libsql_ext_sqlite3_runtime_version_number(VALUE self)
 {
     return INT2FIX(sqlite3_libversion_number());
 }
@@ -241,7 +241,7 @@ VALUE am_sqlite3_runtime_version_number(VALUE self)
  * Return the SQLite C library source id as a string
  *
  */
-VALUE am_sqlite3_runtime_source_id(VALUE self)
+VALUE libsql_ext_sqlite3_runtime_source_id(VALUE self)
 {
     return rb_str_new2(sqlite3_sourceid());
 }
@@ -253,7 +253,7 @@ VALUE am_sqlite3_runtime_source_id(VALUE self)
  * Return the compiletime version number as a string.
  *
  */
-VALUE am_sqlite3_compiled_version(VALUE self)
+VALUE libsql_ext_sqlite3_compiled_version(VALUE self)
 {
     return rb_str_new2( SQLITE_VERSION );
 }
@@ -266,7 +266,7 @@ VALUE am_sqlite3_compiled_version(VALUE self)
  * embedded version of sqlite3.
  *
  */
-VALUE am_sqlite3_compiled_version_number( VALUE self )
+VALUE libsql_ext_sqlite3_compiled_version_number( VALUE self )
 {
     return INT2FIX( SQLITE_VERSION_NUMBER );
 }
@@ -278,7 +278,7 @@ VALUE am_sqlite3_compiled_version_number( VALUE self )
  * Return the compiled SQLite C library source id as a string
  *
  */
-VALUE am_sqlite3_compiled_source_id(VALUE self)
+VALUE libsql_ext_sqlite3_compiled_source_id(VALUE self)
 {
     return rb_str_new2( SQLITE_SOURCE_ID );
 }
@@ -297,41 +297,41 @@ void Init_libsql_ext()
     /*
      * top level module encapsulating the entire Libsql library
      */
-    mA   = rb_define_module("Libsql");
+    mL   = rb_define_module("Libsql");
 
-    mAS  = rb_define_module_under(mA, "SQLite3");
-    rb_define_module_function(mAS, "threadsafe?", am_sqlite3_threadsafe, 0);
-    rb_define_module_function(mAS, "complete?", am_sqlite3_complete, -2);
-    rb_define_module_function(mAS, "randomness", am_sqlite3_randomness,1);
-    rb_define_module_function(mAS, "temp_directory", am_sqlite3_get_temp_directory, 0);
-    rb_define_module_function(mAS, "temp_directory=", am_sqlite3_set_temp_directory, 1);
+    mLS  = rb_define_module_under(mL, "SQLite3");
+    rb_define_module_function(mLS, "threadsafe?", libsql_ext_sqlite3_threadsafe, 0);
+    rb_define_module_function(mLS, "complete?", libsql_ext_sqlite3_complete, -2);
+    rb_define_module_function(mLS, "randomness", libsql_ext_sqlite3_randomness,1);
+    rb_define_module_function(mLS, "temp_directory", libsql_ext_sqlite3_get_temp_directory, 0);
+    rb_define_module_function(mLS, "temp_directory=", libsql_ext_sqlite3_set_temp_directory, 1);
 
-    rb_define_module_function(mAS, "escape", am_sqlite3_escape, 1);
-    rb_define_module_function(mAS, "quote", am_sqlite3_quote, 1);
+    rb_define_module_function(mLS, "escape", libsql_ext_sqlite3_escape, 1);
+    rb_define_module_function(mLS, "quote", libsql_ext_sqlite3_quote, 1);
 
     /*
      * class encapsulating a single Stat
      */
-    cAS_Stat = rb_define_class_under(mAS, "Stat", rb_cObject);
-    rb_define_method(cAS_Stat, "update!", am_sqlite3_stat_update_bang, -1);
+    cLS_Stat = rb_define_class_under(mLS, "Stat", rb_cObject);
+    rb_define_method(cLS_Stat, "update!", libsql_ext_sqlite3_stat_update_bang, -1);
 
     /* 
      * Base class of all SQLite3 errors
      */
-    eAS_Error = rb_define_class_under(mAS, "Error", rb_eStandardError); /* in libsql_ext.c */
+    eLS_Error = rb_define_class_under(mLS, "Error", rb_eStandardError); /* in libsql_ext.c */
 
     /**
      * Encapsulation of the SQLite C library version
      */
-    mASV = rb_define_module_under(mAS, "Version");
-    rb_define_module_function(mASV, "to_s", am_sqlite3_runtime_version, 0); /* in libsql_ext.c */
-    rb_define_module_function(mASV, "runtime_version", am_sqlite3_runtime_version, 0); /* in libsql_ext.c */
-    rb_define_module_function(mASV, "to_i", am_sqlite3_runtime_version_number, 0); /* in libsql_ext.c */
-    rb_define_module_function(mASV, "runtime_version_number", am_sqlite3_runtime_version_number, 0); /* in libsql_ext.c */
-    rb_define_module_function(mASV, "compiled_version", am_sqlite3_compiled_version, 0 ); /* in libsql_ext.c */
-    rb_define_module_function(mASV, "compiled_version_number", am_sqlite3_compiled_version_number, 0 ); /* in libsql_ext.c */
-    rb_define_module_function(mASV, "runtime_source_id", am_sqlite3_runtime_source_id, 0); /* in libsql_ext.c */
-    rb_define_module_function(mASV, "compiled_source_id", am_sqlite3_compiled_source_id, 0); /* in libsql_ext.c */
+    mLSV = rb_define_module_under(mLS, "Version");
+    rb_define_module_function(mLSV, "to_s", libsql_ext_sqlite3_runtime_version, 0); /* in libsql_ext.c */
+    rb_define_module_function(mLSV, "runtime_version", libsql_ext_sqlite3_runtime_version, 0); /* in libsql_ext.c */
+    rb_define_module_function(mLSV, "to_i", libsql_ext_sqlite3_runtime_version_number, 0); /* in libsql_ext.c */
+    rb_define_module_function(mLSV, "runtime_version_number", libsql_ext_sqlite3_runtime_version_number, 0); /* in libsql_ext.c */
+    rb_define_module_function(mLSV, "compiled_version", libsql_ext_sqlite3_compiled_version, 0 ); /* in libsql_ext.c */
+    rb_define_module_function(mLSV, "compiled_version_number", libsql_ext_sqlite3_compiled_version_number, 0 ); /* in libsql_ext.c */
+    rb_define_module_function(mLSV, "runtime_source_id", libsql_ext_sqlite3_runtime_source_id, 0); /* in libsql_ext.c */
+    rb_define_module_function(mLSV, "compiled_source_id", libsql_ext_sqlite3_compiled_source_id, 0); /* in libsql_ext.c */
 
     /*
      * Initialize the rest of the module
@@ -346,7 +346,7 @@ void Init_libsql_ext()
      */
     rc = sqlite3_initialize();
     if ( SQLITE_OK != rc ) {
-        rb_raise(eAS_Error, "Failure to initialize the sqlite3 library : [SQLITE_ERROR %d]\n", rc);
+        rb_raise(eLS_Error, "Failure to initialize the sqlite3 library : [SQLITE_ERROR %d]\n", rc);
     }
 
  }
