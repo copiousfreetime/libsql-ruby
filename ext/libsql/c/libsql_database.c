@@ -6,14 +6,14 @@
  * vim: shiftwidth=4
  */
 
-VALUE cAS_Database;       /* class  Amalgalite::SQLite3::Database        */
-VALUE cAS_Database_Stat;  /* class  Amalgalite::SQLite3::Database::Stat  */
+VALUE cAS_Database;       /* class  Libsql::SQLite3::Database        */
+VALUE cAS_Database_Stat;  /* class  Libsql::SQLite3::Database::Stat  */
 
 /**
  * Document-method: open
  *
  * call-seq:
- *    Amalgalite::SQLite3::Database.open( filename, flags = READWRITE | CREATE ) -> Database
+ *    Libsql::SQLite3::Database.open( filename, flags = READWRITE | CREATE ) -> Database
  *
  * Create a new SQLite2 database with a UTF-8 encoding.
  *
@@ -57,7 +57,7 @@ VALUE am_sqlite3_database_open(int argc, VALUE *argv, VALUE class)
 
 /**
  * call-seq:
- *    Amalgalite::SQLite3::Database.open16( filename ) -> SQLite3::Database
+ *    Libsql::SQLite3::Database.open16( filename ) -> SQLite3::Database
  *
  * Create a new SQLite3 database with a UTF-16 encoding
  *
@@ -393,7 +393,7 @@ int amalgalite_xTraceCallback(unsigned trace_type, void* tap, void* prepared_sta
  * SQLITE_TRACE_STMT and SQLITE_TRACE_PROFILE.
  *
  * The object must respond to both `trace` and `profile` methods. See
- * Amalgalite::Trace::
+ * Libsql::Trace::
  * This is an experimental api and is subject to change, or removal.
  *
  */
@@ -1138,7 +1138,7 @@ VALUE am_sqlite3_database_alloc(VALUE klass)
 }
 
 /**
- * Document-class: Amalgalite::SQLite3::Database
+ * Document-class: Libsql::SQLite3::Database
  *
  * The ruby extension wrapper around the core sqlite3 database object.
  *
@@ -1146,7 +1146,7 @@ VALUE am_sqlite3_database_alloc(VALUE klass)
 void Init_amalgalite_database( )
 {
 
-    VALUE ma  = rb_define_module("Amalgalite");
+    VALUE ma  = rb_define_module("Libsql");
     VALUE mas = rb_define_module_under(ma, "SQLite3");
 
     /*

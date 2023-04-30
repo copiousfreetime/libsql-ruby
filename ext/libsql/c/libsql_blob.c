@@ -213,7 +213,7 @@ VALUE am_sqlite3_blob_alloc(VALUE klass)
 
 
 /**
- * Document-class: Amalgalite::SQLite3::Blob
+ * Document-class: Libsql::SQLite3::Blob
  *
  * The Blob class enables incremental IO on blob items.  If you do not need
  * incremental IO on a binary object, then you do not need to use Blob.
@@ -222,7 +222,7 @@ VALUE am_sqlite3_blob_alloc(VALUE klass)
 void Init_amalgalite_blob( )
 {
 
-    VALUE ma  = rb_define_module("Amalgalite");
+    VALUE ma  = rb_define_module("Libsql");
     VALUE mas = rb_define_module_under(ma, "SQLite3");
 
     /*

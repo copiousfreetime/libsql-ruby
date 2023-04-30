@@ -607,7 +607,7 @@ VALUE am_sqlite3_statement_alloc(VALUE klass)
 void Init_amalgalite_statement( )
 {
 
-    VALUE ma  = rb_define_module("Amalgalite");
+    VALUE ma  = rb_define_module("Libsql");
     VALUE mas = rb_define_module_under(ma, "SQLite3");
 
     /*

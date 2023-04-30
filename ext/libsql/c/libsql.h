@@ -1,12 +1,12 @@
 /**
- * Copyright (c) 2008 Jeremy Hinegardner
+ * Copyright (c) 2023 Jeremy Hinegardner
  * All rights reserved.  See LICENSE and/or COPYING for details.
  *
  * vim: shiftwidth=4 
  */ 
 
-#ifndef __AMALGALITE_H__
-#define __AMALGALITE_H__
+#ifndef __LIBSQL_H__
+#define __LIBSQL_H__
 
 #include "ruby.h"
 #include "sqlite3.h"
@@ -46,17 +46,17 @@ typedef struct am_protected {
 } am_protected_t;
 
 /** module and classes **/
-extern VALUE mA;              /* module Amalgalite                     */
-extern VALUE mAS;             /* module Amalgalite::SQLite3            */
-extern VALUE mASV;            /* module Amalgalite::SQLite3::Version   */
-extern VALUE eAS_Error;       /* class  Amalgalite::SQLite3::Error     */
-extern VALUE cAR;             /* class  Amalgalite::Requries */
-extern VALUE cARB;            /* class  Amalgalite::Requries::Bootstrap  */
+extern VALUE mA;              /* module Libsql                     */
+extern VALUE mAS;             /* module Libsql::SQLite3            */
+extern VALUE mASV;            /* module Libsql::SQLite3::Version   */
+extern VALUE eAS_Error;       /* class  Libsql::SQLite3::Error     */
+extern VALUE cAR;             /* class  Libsql::Requries */
+extern VALUE cARB;            /* class  Libsql::Requries::Bootstrap  */
 
 /*----------------------------------------------------------------------
- * Prototype for Amalgalite::SQLite3::Database
+ * Prototype for Libsql::SQLite3::Database
  *---------------------------------------------------------------------*/
-extern VALUE cAS_Database;    /* class  Amalgalite::SQLite3::Database  */
+extern VALUE cAS_Database;    /* class  Libsql::SQLite3::Database  */
 
 extern void  am_define_constants_under(VALUE);
 extern VALUE am_sqlite3_database_alloc(VALUE klass);
@@ -76,9 +76,9 @@ extern VALUE am_sqlite3_database_register_profile_tap(VALUE self, VALUE tap);
 extern VALUE am_sqlite3_database_busy_handler(VALUE self, VALUE handler);
 
 /*----------------------------------------------------------------------
- * Prototype for Amalgalite::SQLite3::Statement 
+ * Prototype for Libsql::SQLite3::Statement 
  *---------------------------------------------------------------------*/
-extern VALUE cAS_Statement;   /* class  Amalgalite::SQLite3::Statement */
+extern VALUE cAS_Statement;   /* class  Libsql::SQLite3::Statement */
 
 extern VALUE am_sqlite3_statement_alloc(VALUE klass);
 extern void  am_sqlite3_statement_free(am_sqlite3_stmt* );
@@ -113,9 +113,9 @@ extern VALUE am_sqlite3_statement_bind_double(VALUE self, VALUE position, VALUE 
 extern VALUE am_sqlite3_statement_bind_null(VALUE self, VALUE position);
 
 /*----------------------------------------------------------------------
- * Prototype for Amalgalite::SQLite3::Blob
+ * Prototype for Libsql::SQLite3::Blob
  *---------------------------------------------------------------------*/
-extern VALUE cAS_Blob; /* class Amalgalite::SQLite3::Blob */
+extern VALUE cAS_Blob; /* class Libsql::SQLite3::Blob */
 
 extern VALUE am_sqlite3_blob_alloc(VALUE klass);
 extern VALUE am_sqlite3_blob_initialize( VALUE self, VALUE db, VALUE db_name, VALUE table_name, VALUE column_name, VALUE rowid, VALUE flag) ;

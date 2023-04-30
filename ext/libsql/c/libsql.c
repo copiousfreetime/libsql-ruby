@@ -8,19 +8,19 @@
 #include "amalgalite.h"
 
 /* Module and Classes */
-VALUE mA;              /* module Amalgalite                     */
-VALUE mAS;             /* module Amalgalite::SQLite3            */
-VALUE mASV;            /* module Amalgalite::SQLite3::Version   */
-VALUE eAS_Error;       /* class  Amalgalite::SQLite3::Error     */
-VALUE cAS_Stat;        /* class  Amalgalite::SQLite3::Stat      */
+VALUE mA;              /* module Libsql                     */
+VALUE mAS;             /* module Libsql::SQLite3            */
+VALUE mASV;            /* module Libsql::SQLite3::Version   */
+VALUE eAS_Error;       /* class  Libsql::SQLite3::Error     */
+VALUE cAS_Stat;        /* class  Libsql::SQLite3::Stat      */
 
 /*----------------------------------------------------------------------
- * module methods for Amalgalite::SQLite3
+ * module methods for Libsql::SQLite3
  *---------------------------------------------------------------------*/
 
 /*
  * call-seq:
- *    Amalgalite::SQLite3.threadsafe? -> true or false
+ *    Libsql::SQLite3.threadsafe? -> true or false
  *
  * Has the SQLite3 extension been compiled "threadsafe".  If threadsafe? is
  * true then the internal SQLite mutexes are enabled and SQLite is threadsafe.
@@ -38,7 +38,7 @@ VALUE am_sqlite3_threadsafe(VALUE self)
 
 /*
  * call-seq:
- *  Amalgalite::SQLite.temp_directory -> String or nil
+ *  Libsql::SQLite.temp_directory -> String or nil
  *
  * Return the directory name that all that all the temporary files created by
  * SQLite creates will be placed.  If _nil_ is returned, then SQLite will search
@@ -55,7 +55,7 @@ VALUE am_sqlite3_get_temp_directory( VALUE self )
 
 /*
  * call-seq:
- *  Amalgalite::SQLite.temp_directory = "/tmp/location"
+ *  Libsql::SQLite.temp_directory = "/tmp/location"
  *
  * Set the temporary directory used by sqlite to store temporary directories.
  * It is not safe to set this value after a Database has been opened.
@@ -98,7 +98,7 @@ VALUE amalgalite_format_string( const char* pattern, VALUE string )
 }
 /*
  * call-seq:
- *  Amalgalite::SQLite.escape( string ) => escaped_string
+ *  Libsql::SQLite.escape( string ) => escaped_string
  *
  * Takes the input string and escapes each ' (single quote) character by
  * doubling it.
@@ -110,7 +110,7 @@ VALUE am_sqlite3_escape( VALUE self, VALUE string )
 
 /*
  * call-seq:
- *  Amalgalite::SQLite.quote( string ) => quoted-escaped string
+ *  Libsql::SQLite.quote( string ) => quoted-escaped string
  *
  * Takes the input string and surrounds it with single quotes, it also escapes
  * each embedded single quote with double quotes.
@@ -122,7 +122,7 @@ VALUE am_sqlite3_quote( VALUE self, VALUE string )
 
 /*
  * call-seq:
- *    Amalgalite::SQLite3.complete?( ... , opts = { :utf16 => false }) -> True, False
+ *    Libsql::SQLite3.complete?( ... , opts = { :utf16 => false }) -> True, False
  *
  * Is the text passed in as a parameter a complete SQL statement?  Or is
  * additional input required before sending the SQL to the extension.  If the
@@ -154,7 +154,7 @@ VALUE am_sqlite3_complete(VALUE self, VALUE args)
 
 /*
  * call-seq:
- *    Amalgalite::SQLite3::Stat.update!( reset = false ) -> nil
+ *    Libsql::SQLite3::Stat.update!( reset = false ) -> nil
  *
  * Populates the _@current_ and _@higwater_ instance variables of self
  * object with the values from the sqlite3_status call.  If reset it true then
@@ -192,7 +192,7 @@ VALUE am_sqlite3_stat_update_bang( int argc, VALUE *argv, VALUE self )
 
 /*
  * call-seq:
- *    Amalgalite::SQLite3.randomness( N ) -> String of length N
+ *    Libsql::SQLite3.randomness( N ) -> String of length N
  *
  * Generate N bytes of random data.
  *
@@ -207,12 +207,12 @@ VALUE am_sqlite3_randomness(VALUE self, VALUE num_bytes)
 }
 
 /*----------------------------------------------------------------------
- * module methods for Amalgalite::SQLite3::Version
+ * module methods for Libsql::SQLite3::Version
  *---------------------------------------------------------------------*/
 
 /*
  * call-seq:
- *    Amalgalite::SQLite3::Version.to_s -> String
+ *    Libsql::SQLite3::Version.to_s -> String
  *
  * Return the SQLite C library version number as a string
  *
@@ -224,7 +224,7 @@ VALUE am_sqlite3_runtime_version(VALUE self)
 
 /*
  * call-seq:
- *    Amalgalite::SQLite3.Version.to_i -> Fixnum
+ *    Libsql::SQLite3.Version.to_i -> Fixnum
  *
  * Return the SQLite C library version number as an integer
  *
@@ -236,7 +236,7 @@ VALUE am_sqlite3_runtime_version_number(VALUE self)
 
 /*
  * call-seq:
- *    Amalgalite::SQLite3::Version.runtime_source_id -> String
+ *    Libsql::SQLite3::Version.runtime_source_id -> String
  *
  * Return the SQLite C library source id as a string
  *
@@ -248,7 +248,7 @@ VALUE am_sqlite3_runtime_source_id(VALUE self)
 
 /*
  * call-seq:
- *   Amalgalite::SQLite::Version.compiled_version -> String
+ *   Libsql::SQLite::Version.compiled_version -> String
  *
  * Return the compiletime version number as a string.
  *
@@ -260,7 +260,7 @@ VALUE am_sqlite3_compiled_version(VALUE self)
 
 /*
  * call-seql:
- *   Amalgalite::SQLite::Version.compiled_version_number -> Fixnum
+ *   Libsql::SQLite::Version.compiled_version_number -> Fixnum
  *
  * Return the compiletime library version from the 
  * embedded version of sqlite3.
@@ -273,7 +273,7 @@ VALUE am_sqlite3_compiled_version_number( VALUE self )
 
 /*
  * call-seq:
- *    Amalgalite::SQLite3::Version.compiled_source_id -> String
+ *    Libsql::SQLite3::Version.compiled_source_id -> String
  *
  * Return the compiled SQLite C library source id as a string
  *
@@ -284,9 +284,9 @@ VALUE am_sqlite3_compiled_source_id(VALUE self)
 }
 
 /**
- * Document-class: Amalgalite::SQLite3
+ * Document-class: Libsql::SQLite3
  *
- * The SQLite ruby extension inside Amalgalite.
+ * The SQLite ruby extension inside Libsql.
  *
  */
 
@@ -295,9 +295,9 @@ void Init_amalgalite()
     int rc = 0;
 
     /*
-     * top level module encapsulating the entire Amalgalite library
+     * top level module encapsulating the entire Libsql library
      */
-    mA   = rb_define_module("Amalgalite");
+    mA   = rb_define_module("Libsql");
 
     mAS  = rb_define_module_under(mA, "SQLite3");
     rb_define_module_function(mAS, "threadsafe?", am_sqlite3_threadsafe, 0);
