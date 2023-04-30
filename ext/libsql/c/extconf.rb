@@ -25,7 +25,8 @@ $CFLAGS ++ " -DSQLITE_EANBLE_QPSG=1"
 $CFLAGS += " -DSQLITE_ENABLE_RBU=1"
 $CFLAGS += " -DSQLITE_ENABLE_RTREE=1"
 $CFLAGS += " -DSQLITE_ENABLE_SESSION=1"
-$CFLAGS += " -DSQLITE_ENABLE_SNAPSHOT=1"
+# https://github.com/libsql/libsql/issues/144
+# $CFLAGS += " -DSQLITE_ENABLE_SNAPSHOT=1"
 $CFLAGS += " -DSQLITE_ENABLE_STMTVTAB=1"
 $CFLAGS += " -DSQLITE_ENABLE_STAT4=1"
 $CFLAGS += " -DSQLITE_ENABLE_UNLOCK_NOTIFY=1"
@@ -59,7 +60,6 @@ ignore_by_compiler = {
                   unused-variable
                   unused-but-set-variable
                   undef
-                  traditional
   ],
   "gcc" => %w[
               declaration-after-statement
