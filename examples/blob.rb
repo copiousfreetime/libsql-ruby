@@ -20,7 +20,6 @@ require 'rubygems'
 $: << "../lib"
 $: << "../ext"
 require 'libsql'
-require 'libsql/packer'
 VALID_ACTIONS = %w[ list retrieve store ]
 def usage 
   STDERR.puts "Usage: #{File.basename($0)} ( #{VALID_ACTIONS.join(' | ')} )  file(s)"
@@ -39,13 +38,28 @@ file_list = ARGV
 # create the database if it doesn't exist
 #
 db = ::Libsql::Database.new( "filestore.db" )
+schema = db.schema
+unless schema.tables['files']
+
+  schema = <<~SQL
+  CREATE TABLE files (
+    id integer primary key autoincrement,
+    filename text unique,
+    contents blob
+  )
+  SQL
+
+  db.execute(schema)
+  db.reload_schema!
+end
+
 
 case action
   #
   # list all the files that are stored in the database
   #
 when 'list'
-  db.execute("SELECT filename FROM rubylibs") do |row|
+  db.execute("SELECT filename FROM files") do |row|
     puts row['filename']
   end
 
@@ -63,26 +77,30 @@ when 'list'
   #
 when 'store'
   usage if file_list.empty?
-  require 'libsql/packer'
 
-  packer = ::Libsql::Packer.new( :dbfile => 'filestore.db',
-                                   :compressed => false )
-  packer.pack( file_list )
+  contents_column = db.schema.tables['files'].columns['contents']
+  db.transaction do |trans|
+    trans.prepare("INSERT INTO files (filename, contents) VALUES ($filename, $contents)") do |stmt|
+      file_list.each do |file_path|
+        contents = IO.read(file_path)
+        content_io = StringIO.new(contents)
+        stmt.execute("$filename" => file_path,
+                     "$contents" => ::Libsql::Blob.new(io: content_io,
+                                                       column: contents_column)
+                    )
+      end
+    end
+  end
 
-  #
-  # dump the file that matches the right path to stdout.  This also shows
-  # positional sql varible binding using the '?' syntax.
-  #
-when 'retrieve'
-  usage if file_list.empty?
-  db.execute("SELECT id, compressed, filename, contents FROM rubylibs WHERE filename = ?", file_list.first) do |row|
-    STDERR.puts "Dumping #{row['filename']} to stdout"
-    if row['compressed'] then
-      s = row['contents'].to_s
-      STDOUT.puts ::Libsql::Packer.gunzip( s )
-    else
+    #
+    # dump the file that matches the right path to stdout.  This also shows
+    # positional sql varible binding using the '?' syntax.
+    #
+  when 'retrieve'
+    usage if file_list.empty?
+    db.execute("SELECT id, filename, contents FROM files WHERE filename = ?", file_list.first) do |row|
+      STDERR.puts "Dumping #{row['filename']} to stdout"
       row['contents'].write_to_io( STDOUT )
     end
   end
-end
-db.close
+  db.close
