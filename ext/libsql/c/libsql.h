@@ -132,7 +132,6 @@ extern void Init_amalgalite_constants( );
 extern void Init_amalgalite_database( );
 extern void Init_amalgalite_statement( );
 extern void Init_amalgalite_blob( );
-extern void Init_amalgalite_requires_bootstrap( );
 
  
 /***********************************************************************
