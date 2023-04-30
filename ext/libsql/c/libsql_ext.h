@@ -46,8 +46,6 @@ typedef struct libsql_ext_protected {
 } libsql_ext_protected_t;
 
 /** module and classes **/
-extern VALUE cAR;             /* class  Libsql::Requries */
-extern VALUE cARB;            /* class  Libsql::Requries::Bootstrap  */
 extern VALUE mL;              /* module Libsql                     */
 extern VALUE mLS;             /* module Libsql::SQLite3            */
 extern VALUE mLSV;            /* module Libsql::SQLite3::Version   */
