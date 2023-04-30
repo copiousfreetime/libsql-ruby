@@ -1,6 +1,6 @@
 #include "libsql_ext.h"
 /**
- * Copyright (c) 2008 Jeremy Hinegardner
+ * Copyright (c) 2023 Jeremy Hinegardner
  * All rights reserved.  See LICENSE and/or COPYING for details.
  *
  * vim: shiftwidth=4
