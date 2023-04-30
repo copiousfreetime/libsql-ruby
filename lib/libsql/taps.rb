@@ -1,2 +1,2 @@
-require 'amalgalite/taps/console'
-require 'amalgalite/taps/io'
+require 'libsql/taps/console'
+require 'libsql/taps/io'

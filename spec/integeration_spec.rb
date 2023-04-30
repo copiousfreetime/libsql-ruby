@@ -7,15 +7,15 @@ describe "Integration specifications" do
 
   describe " - invalid queries" do
     it "raises error with an invalid syntax" do
-      lambda{ @iso_db.prepare "SELECT from country" }.should raise_error( ::Amalgalite::SQLite3::Error )
+      lambda{ @iso_db.prepare "SELECT from country" }.should raise_error( ::Libsql::SQLite3::Error )
     end
 
     it "raises error with invalid table" do
-      lambda{ @iso_db.prepare "SELECT * FROM foo" }.should raise_error( ::Amalgalite::SQLite3::Error )
+      lambda{ @iso_db.prepare "SELECT * FROM foo" }.should raise_error( ::Libsql::SQLite3::Error )
     end
     
     it "raises error with invalid column" do
-      lambda{ @iso_db.prepare "SELECT foo FROM country" }.should raise_error( ::Amalgalite::SQLite3::Error )
+      lambda{ @iso_db.prepare "SELECT foo FROM country" }.should raise_error( ::Libsql::SQLite3::Error )
     end
   end
 
@@ -32,7 +32,7 @@ describe "Integration specifications" do
       "varchar(2)"=> { :value => nil, :klass => NilClass }
     }.each_pair do |sql_type, ruby_info|
       it "converts a ruby obj (#{ruby_info[:value].to_s}) of #{ruby_info[:klass]} to an SQL type of #{sql_type} and back again " do
-        db = Amalgalite::Database.new( SpecInfo.test_db )
+        db = ::Libsql::Database.new( SpecInfo.test_db )
         db.execute "CREATE TABLE t( c #{sql_type} )"
         db.execute "insert into t (c) values ( ? )", ruby_info[:value]
         rows = db.execute "select * from t"
@@ -60,8 +60,8 @@ describe "Integration specifications" do
       "varchar(2)"=> { :value => nil,          :result => nil }
     }.each_pair do |sql_type, ruby_info|
       it "converts a ruby obj (#{ruby_info[:value].to_s}) of class #{ruby_info[:value].class.name} to an SQL type of #{sql_type} and back to a storage type" do
-        db = Amalgalite::Database.new( SpecInfo.test_db )
-        db.type_map = Amalgalite::TypeMaps::StorageMap.new
+        db = ::Libsql::Database.new( SpecInfo.test_db )
+        db.type_map = ::Libsql::TypeMaps::StorageMap.new
         db.execute "CREATE TABLE t( c #{sql_type} )"
         db.execute "insert into t (c) values ( ? )", ruby_info[:value]
         rows = db.execute "select * from t"
@@ -83,8 +83,8 @@ describe "Integration specifications" do
       "varchar(2)"=> { :value => nil,          :result => "" }
     }.each_pair do |sql_type, ruby_info|
       it "converts a ruby obj (#{ruby_info[:value].to_s}) of class #{ruby_info[:value].class.name} to an SQL type of #{sql_type} and back to text" do
-        db = Amalgalite::Database.new( SpecInfo.test_db )
-        db.type_map = Amalgalite::TypeMaps::TextMap.new
+        db = ::Libsql::Database.new( SpecInfo.test_db )
+        db.type_map = ::Libsql::TypeMaps::TextMap.new
         db.execute "CREATE TABLE t( c #{sql_type} )"
         db.execute "insert into t (c) values ( ? )", ruby_info[:value]
         rows = db.execute "select * from t"

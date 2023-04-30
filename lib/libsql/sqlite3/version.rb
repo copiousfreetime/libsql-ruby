@@ -2,7 +2,7 @@
 # Copyright (c) 2008 Jeremy Hinegardner
 # All rights reserved.  See LICENSE and/or COPYING for details.
 #++
-module Amalgalite 
+module ::Libsql 
   module SQLite3
     module Version
       # Sqlite3 version number is equal to 
@@ -19,7 +19,7 @@ module Amalgalite
 
       #
       # call-seq:
-      #   Amalgalite::SQLite3::Version.to_a -> [ MAJOR, MINOR, RELEASE ]
+      #   ::Libsql::SQLite3::Version.to_a -> [ MAJOR, MINOR, RELEASE ]
       #
       # Return the SQLite C library version number as an array of MAJOR, MINOR,
       # RELEASE
@@ -33,21 +33,21 @@ module Amalgalite
       end
     end
 
-    # Version of SQLite that ships with Amalgalite
+    # Version of SQLite that ships with ::Libsql
     VERSION = Version.to_s.freeze
   end
 end
 
-unless Amalgalite::SQLite3::Version.compiled_matches_runtime? then
+unless ::Libsql::SQLite3::Version.compiled_matches_runtime? then
   warn <<eom
 You are seeing something odd.  The compiled version of SQLite that
 is embedded in this extension is for some reason, not being used.
-The version in the extension is #{Amalgalite::SQLite3::Version.compiled_version} and the version that
-as been loaded as a shared library is #{Amalgalite::SQLite3::Version.runtime_version}.  These versions
+The version in the extension is #{::Libsql::SQLite3::Version.compiled_version} and the version that
+as been loaded as a shared library is #{::Libsql::SQLite3::Version.runtime_version}.  These versions
 should be the same, but they are not.
 
 One known issue is if you are using this libary in conjunction with
-Hitimes on Mac OS X.  You should make sure that "require 'amalgalite'"
+Hitimes on Mac OS X.  You should make sure that "require 'libsql'"
 appears before "require 'hitimes'" in your ruby code.
 
 This is a non-trivial problem, and I am working on it.

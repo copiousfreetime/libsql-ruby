@@ -1,8 +1,8 @@
 require 'spec_helper'
 
-describe Amalgalite::Statement do
+describe ::Libsql::Statement do
   before(:each) do
-    @db = Amalgalite::Database.new( SpecInfo.test_db )
+    @db = ::Libsql::Database.new( SpecInfo.test_db )
   end
 
   after(:each) do
@@ -40,7 +40,7 @@ describe Amalgalite::Statement do
 
   it "raises an error if there are not enough parameters are passed in a statement" do
     @iso_db.prepare("SELECT * FROM country WHERE two_letter = :two") do |stmt|
-      lambda{ stmt.execute }.should raise_error( Amalgalite::Error )
+      lambda{ stmt.execute }.should raise_error( ::Libsql::Error )
     end
   end
 
@@ -114,7 +114,7 @@ describe Amalgalite::Statement do
 
   it "raises and error if an invaliding binding is attempted" do 
     @iso_db.prepare("SELECT * FROM country WHERE id = :somevar ORDER BY name ") do |stmt|
-      lambda{ stmt.execute( "blah" => 42 ) }.should raise_error(Amalgalite::Error)
+      lambda{ stmt.execute( "blah" => 42 ) }.should raise_error(::Libsql::Error)
     end
   end
 
@@ -132,7 +132,7 @@ describe Amalgalite::Statement do
   end
 
   it "can select the rowid from the table" do
-    db = Amalgalite::Database.new( ":memory:" )
+    db = ::Libsql::Database.new( ":memory:" )
     db.execute( "create table t1(c1,c2,c3)" )
     db.execute("insert into t1(c1,c2,c3) values (1,2,'abc')")
     rows = db.execute( "select rowid,* from t1")
@@ -143,7 +143,7 @@ describe Amalgalite::Statement do
   end
 
   it "shows that the rowid column is rowid column" do
-    db = Amalgalite::Database.new( ":memory:" )
+    db = ::Libsql::Database.new( ":memory:" )
     db.execute( "create table t1(c1,c2,c3)" )
     db.execute("insert into t1(c1,c2,c3) values (1,2,'abc')")
     db.prepare( "select oid,* from t1" ) do |stmt|

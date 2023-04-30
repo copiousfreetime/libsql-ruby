@@ -6,9 +6,9 @@
 require 'time'
 require 'date'
 
-module Amalgalite::TypeMaps
+module ::Libsql::TypeMaps
   ##
-  # An Amalgalite::TypeMap that does its best to convert between Ruby classes
+  # An ::Libsql::TypeMap that does its best to convert between Ruby classes
   # and known SQL data types.  
   #
   # Upon instantiation, DefaultMap generates a conversion map to try to figure
@@ -64,15 +64,15 @@ module Amalgalite::TypeMaps
     def bind_type_of( obj )
       case obj
       when Float
-        ::Amalgalite::SQLite3::Constants::DataType::FLOAT
+        ::Libsql::SQLite3::Constants::DataType::FLOAT
       when Integer
-        ::Amalgalite::SQLite3::Constants::DataType::INTEGER
+        ::Libsql::SQLite3::Constants::DataType::INTEGER
       when NilClass
-        ::Amalgalite::SQLite3::Constants::DataType::NULL
-      when ::Amalgalite::Blob
-        ::Amalgalite::SQLite3::Constants::DataType::BLOB
+        ::Libsql::SQLite3::Constants::DataType::NULL
+      when ::Libsql::Blob
+        ::Libsql::SQLite3::Constants::DataType::BLOB
       else
-        ::Amalgalite::SQLite3::Constants::DataType::TEXT
+        ::Libsql::SQLite3::Constants::DataType::TEXT
       end
     end
 
@@ -87,7 +87,7 @@ module Amalgalite::TypeMaps
         return value
       when NilClass
         return value
-      when Amalgalite::Blob
+      when ::Libsql::Blob
         return value
       when String
         if declared_type then
@@ -95,14 +95,14 @@ module Amalgalite::TypeMaps
           if conversion_method then
             return send(conversion_method, value)  
           else
-            raise ::Amalgalite::Error, "Unable to convert SQL type of #{declared_type} to a Ruby class"
+            raise ::Libsql::Error, "Unable to convert SQL type of #{declared_type} to a Ruby class"
           end
         else
           # unable to do any other conversion, just return what we have.
           return value
         end
       else 
-        raise ::Amalgalite::Error, "Unable to convert a class #{value.class.name} with value #{value.inspect}"
+        raise ::Libsql::Error, "Unable to convert a class #{value.class.name} with value #{value.inspect}"
       end
     end
 
@@ -153,14 +153,14 @@ module Amalgalite::TypeMaps
     # convert a string to true of false
     #
     def boolean( str )
-      ::Amalgalite::Boolean.to_bool( str )
+      ::Libsql::Boolean.to_bool( str )
     end
 
     ##
     # convert a string to a blob
     #
     def blob( str )
-      ::Amalgalite::Blob.new( :string => str )
+      ::Libsql::Blob.new( :string => str )
     end
   end
 end

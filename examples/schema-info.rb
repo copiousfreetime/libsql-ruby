@@ -1,14 +1,14 @@
 #!/usr/bin/env ruby
 
 require 'rubygems'
-require 'amalgalite'
+require 'libsql'
 
 db_name = ARGV.shift
 unless db_name 
   puts "Usage: #{File.basename($0)} dbname" 
   exit 1
 end
-db = Amalgalite::Database.new( db_name )
+db = ::Libsql::Database.new( db_name )
 col_info = %w[ default_value declared_data_type collation_sequence_name not_null_constraint primary_key auto_increment ]
 max_width = col_info.collect { |c| c.length }.sort.last
 

@@ -4,7 +4,7 @@ else
   require 'fastercsv'
   ::CSV = ::FasterCSV
 end
-module Amalgalite
+module ::Libsql
   ##
   # A class to deal with importing CSV data into a single table in the
   # database.

@@ -1,22 +1,22 @@
 require 'spec_helper'
 
 require 'thread'
-require 'amalgalite'
-require 'amalgalite/taps/io'
-require 'amalgalite/taps/console'
-require 'amalgalite/database'
+require 'libsql'
+require 'libsql/taps/io'
+require 'libsql/taps/console'
+require 'libsql/database'
 
-describe Amalgalite::Database do
+describe ::Libsql::Database do
 
   it "can create a new database" do
-    db = Amalgalite::Database.new( SpecInfo.test_db )
-    db.instance_of?(Amalgalite::Database) 
-    db.api.instance_of?(Amalgalite::SQLite3::Database) 
+    db = ::Libsql::Database.new( SpecInfo.test_db )
+    db.instance_of?(::Libsql::Database) 
+    db.api.instance_of?(::Libsql::SQLite3::Database) 
     File.exist?( SpecInfo.test_db ).should eql(true)
   end
 
   it "creates a new UTF-8 database (need exec to check pragma encoding)" do
-    db = Amalgalite::Database.new( SpecInfo.test_db )
+    db = ::Libsql::Database.new( SpecInfo.test_db )
     db.execute_batch( @schema );
     db.should_not be_utf16
     db.encoding.should eql("UTF-8")
@@ -25,12 +25,12 @@ describe Amalgalite::Database do
   it "creates a new UTF-16 database (need exec to check pragma encoding)" 
 
   it "raises an error if the file does not exist and the database is opened with a non-create mode" do
-    lambda { Amalgalite::Database.new( SpecInfo.test_db, "r") }.should raise_error(Amalgalite::SQLite3::Error)
-    lambda { Amalgalite::Database.new( SpecInfo.test_db, "r+") }.should raise_error(Amalgalite::SQLite3::Error)
+    lambda { ::Libsql::Database.new( SpecInfo.test_db, "r") }.should raise_error(::Libsql::SQLite3::Error)
+    lambda { ::Libsql::Database.new( SpecInfo.test_db, "r+") }.should raise_error(::Libsql::SQLite3::Error)
   end
 
   it "raises an error if an invalid mode is used" do
-    lambda { Amalgalite::Database.new( SpecInfo.test_db, "b+" ) }.should raise_error(Amalgalite::Database::InvalidModeError)
+    lambda { ::Libsql::Database.new( SpecInfo.test_db, "b+" ) }.should raise_error(::Libsql::Database::InvalidModeError)
   end
 
   it "can be in autocommit mode, and is by default" do
@@ -46,34 +46,34 @@ describe Amalgalite::Database do
   end
 
   it "prepares a statment" do
-    db = Amalgalite::Database.new( SpecInfo.test_db )
+    db = ::Libsql::Database.new( SpecInfo.test_db )
     stmt = db.prepare("SELECT datetime()")
-    stmt.instance_of?(Amalgalite::Statement)
-    stmt.api.instance_of?(Amalgalite::SQLite3::Statement)
+    stmt.instance_of?(::Libsql::Statement)
+    stmt.api.instance_of?(::Libsql::SQLite3::Statement)
   end
 
   it "raises an error on invalid syntax when preparing a bad sql statement" do
-    db = Amalgalite::Database.new( SpecInfo.test_db )
-    lambda { db.prepare("SELECT nothing FROM stuf") }.should raise_error(Amalgalite::SQLite3::Error)
+    db = ::Libsql::Database.new( SpecInfo.test_db )
+    lambda { db.prepare("SELECT nothing FROM stuf") }.should raise_error(::Libsql::SQLite3::Error)
   end
 
   it "closes normally" do
-    db = Amalgalite::Database.new( SpecInfo.test_db )
+    db = ::Libsql::Database.new( SpecInfo.test_db )
     expect { db.close }.not_to raise_error
   end
 
   it "returns the id of the last inserted row" do
-    db = Amalgalite::Database.new( SpecInfo.test_db )
+    db = ::Libsql::Database.new( SpecInfo.test_db )
     db.last_insert_rowid.should eql(0)
   end
 
   it "is in autocommit mode by default" do
-    db = Amalgalite::Database.new( SpecInfo.test_db )
+    db = ::Libsql::Database.new( SpecInfo.test_db )
     db.should be_autocommit
   end
 
   it "report the number of rows changed with an insert" do
-    db = Amalgalite::Database.new( SpecInfo.test_db )
+    db = ::Libsql::Database.new( SpecInfo.test_db )
     db.execute_batch <<-sql
       CREATE TABLE t1( x );
       INSERT INTO t1( x ) values ( 1 );
@@ -87,7 +87,7 @@ describe Amalgalite::Database do
   end
 
   it "reports the number of rows deleted" do
-    db = Amalgalite::Database.new( SpecInfo.test_db )
+    db = ::Libsql::Database.new( SpecInfo.test_db )
     db.execute_batch <<-sql
       CREATE TABLE t1( x );
       INSERT INTO t1( x ) values ( 1 );
@@ -100,12 +100,12 @@ describe Amalgalite::Database do
   end
 
   it "can immediately execute an sql statement " do
-    db = Amalgalite::Database.new( SpecInfo.test_db )
+    db = ::Libsql::Database.new( SpecInfo.test_db )
     db.execute( "CREATE TABLE t1( x, y, z )" ).should be_empty
   end
 
   it "can execute a batch of commands" do
-    db = Amalgalite::Database.new( SpecInfo.test_db )
+    db = ::Libsql::Database.new( SpecInfo.test_db )
     db.execute_batch( @schema ).should eql(5)
   end
 
@@ -115,9 +115,9 @@ describe Amalgalite::Database do
   end
 
   it "traces the execution of code" do
-    db = Amalgalite::Database.new( SpecInfo.test_db )
+    db = ::Libsql::Database.new( SpecInfo.test_db )
     sql = "CREATE TABLE trace_test( x, y, z)"
-    s = db.trace_tap = ::Amalgalite::Taps::StringIO.new
+    s = db.trace_tap = ::Libsql::Taps::StringIO.new
     db.execute( sql )
     escaped_sql= Regexp.quote(sql)
     db.trace_tap.string.should match(/registered as trace tap/)
@@ -129,13 +129,13 @@ describe Amalgalite::Database do
   end
 
   it "raises an exception if the wrong type of object is used for tracing" do
-    db = Amalgalite::Database.new( SpecInfo.test_db )
-    lambda { db.trace_tap = Object.new }.should raise_error(Amalgalite::Error)
+    db = ::Libsql::Database.new( SpecInfo.test_db )
+    lambda { db.trace_tap = Object.new }.should raise_error(::Libsql::Error)
   end
 
   it "profiles the execution of code" do
-    db = Amalgalite::Database.new( SpecInfo.test_db )
-    s = db.trace_tap = ::Amalgalite::Taps::StringIO.new
+    db = ::Libsql::Database.new( SpecInfo.test_db )
+    s = db.trace_tap = ::Libsql::Taps::StringIO.new
     db.execute_batch( @schema )
     db.trace_tap.samplers.size.should eql(5)
     db.trace_tap = nil
@@ -159,14 +159,14 @@ describe Amalgalite::Database do
   end
 
   it "can use something that responds to 'write' as a tap" do
-    db = Amalgalite::Database.new( SpecInfo.test_db )
+    db = ::Libsql::Database.new( SpecInfo.test_db )
     s2 = db.trace_tap   = StringIO.new
     s2.string.should eql("registered as trace tap")
   end
 
   it "can clear all registered taps" do
-    db = Amalgalite::Database.new( SpecInfo.test_db )
-    s = db.trace_tap = ::Amalgalite::Taps::StringIO.new
+    db = ::Libsql::Database.new( SpecInfo.test_db )
+    s = db.trace_tap = ::Libsql::Taps::StringIO.new
     db.execute_batch( @schema )
     db.trace_tap.samplers.size.should eql(5)
     db.clear_taps!
@@ -174,7 +174,7 @@ describe Amalgalite::Database do
   end
 
   it "allows nested transactions even if SQLite under the covers does not" do
-    db = Amalgalite::Database.new( SpecInfo.test_db )
+    db = ::Libsql::Database.new( SpecInfo.test_db )
     r = db.transaction do |db2|
       r2 = db.transaction { 42 }
       r2.should eql(42)
@@ -185,14 +185,14 @@ describe Amalgalite::Database do
 
   %w[ transaction deferred_transaction immediate_transaction exclusive_transaction ].each do |trans|
     it "returns the result of the #{trans} when a block is yielded" do
-      db = Amalgalite::Database.new( SpecInfo.test_db )
+      db = ::Libsql::Database.new( SpecInfo.test_db )
       (db.send( trans ){ 42 }).should eql(42)
     end
   end
 
   it "#reload_schema!" do
     schema = @iso_db.schema
-    schema.instance_of?( Amalgalite::Schema ).should eql(true)
+    schema.instance_of?( ::Libsql::Schema ).should eql(true)
     s2 = @iso_db.reload_schema!
     s2.object_id.should_not eql(schema.object_id)
   end
@@ -244,7 +244,7 @@ describe Amalgalite::Database do
 
   it "does not reraise an exception that exits before the transaction starts" do
     class MyExceptionTest < RuntimeError; end
-    db = Amalgalite::Database.new( ":memory:" )
+    db = ::Libsql::Database.new( ":memory:" )
 
     lambda {
       begin
@@ -257,23 +257,23 @@ describe Amalgalite::Database do
 
   describe "#define_function" do
    it "does not allow mixing of arbitrary and mandatory arguments to an SQL function" do
-      class DBFunctionTest2 < ::Amalgalite::Function
+      class DBFunctionTest2 < ::Libsql::Function
         def initialize
           super( 'ftest2', -2 )
         end
         def call( a, *args ); end
       end
-      lambda { @iso_db.define_function("ftest2", DBFunctionTest2.new ) }.should raise_error( ::Amalgalite::Database::FunctionError )
+      lambda { @iso_db.define_function("ftest2", DBFunctionTest2.new ) }.should raise_error( ::Libsql::Database::FunctionError )
     end
 
     it "does not allow outrageous arity" do
-      class DBFunctionTest3 < ::Amalgalite::Function
+      class DBFunctionTest3 < ::Libsql::Function
         def initialize
           super( 'ftest3', 128 )
         end
         def call( *args) ; end
       end
-      lambda { @iso_db.define_function("ftest3", DBFunctionTest3.new ) }.should raise_error( ::Amalgalite::SQLite3::Error )
+      lambda { @iso_db.define_function("ftest3", DBFunctionTest3.new ) }.should raise_error( ::Libsql::SQLite3::Error )
     end
 
  end
@@ -290,12 +290,12 @@ describe Amalgalite::Database do
       r.first['r'].should eql("rtest1 called")
       @iso_db.remove_function("rtest1")
 
-      lambda { @iso_db.execute( "select rtest1() as r" )}.should raise_error( ::Amalgalite::SQLite3::Error, /no such function: rtest1/ )
+      lambda { @iso_db.execute( "select rtest1() as r" )}.should raise_error( ::Libsql::SQLite3::Error, /no such function: rtest1/ )
       @iso_db.functions.size.should eql(0)
     end
 
     it "unregisters a function by instances" do
-      class FunctionTest5 < ::Amalgalite::Function
+      class FunctionTest5 < ::Libsql::Function
         def initialize
           super( 'ftest5', 0)
         end
@@ -306,7 +306,7 @@ describe Amalgalite::Database do
       r = @iso_db.execute( "select ftest5() AS r" )
       r.first['r'].should eql("ftest5 called")
       @iso_db.remove_function("ftest5", FunctionTest5.new )
-      lambda { @iso_db.execute( "select ftest5() as r" )}.should raise_error( ::Amalgalite::SQLite3::Error, /no such function: ftest5/ )
+      lambda { @iso_db.execute( "select ftest5() as r" )}.should raise_error( ::Libsql::SQLite3::Error, /no such function: ftest5/ )
       @iso_db.functions.size.should eql(0)
     end
 
@@ -325,8 +325,8 @@ describe Amalgalite::Database do
       r = @iso_db.execute( "select rtest() AS r")
       r.first['r'].should eql("rtest/0 called")
       @iso_db.remove_function( 'rtest' )
-      lambda {  @iso_db.execute( "select rtest(1) AS r") }.should raise_error( ::Amalgalite::SQLite3::Error )
-      lambda {  @iso_db.execute( "select rtest() AS r")  }.should raise_error( ::Amalgalite::SQLite3::Error )
+      lambda {  @iso_db.execute( "select rtest(1) AS r") }.should raise_error( ::Libsql::SQLite3::Error )
+      lambda {  @iso_db.execute( "select rtest() AS r")  }.should raise_error( ::Libsql::SQLite3::Error )
       @iso_db.functions.size.should eql(0)
     end
   end
@@ -375,7 +375,7 @@ describe Amalgalite::Database do
     other.join
 
     #$stdout.puts " looped #{other[:loop_count]} times"
-    other[:had_error].should be_an_instance_of( ::Amalgalite::SQLite3::Error )
+    other[:had_error].should be_an_instance_of( ::Libsql::SQLite3::Error )
     other[:had_error].message.should =~ / interrupted/
   end
 
@@ -484,7 +484,7 @@ describe Amalgalite::Database do
   it "replicates a database to a database file" do
     all_sub = @iso_db.execute("SELECT count(*) as cnt from subcountry").first['cnt']
 
-    fdb = Amalgalite::Database.new( SpecInfo.test_db )
+    fdb = ::Libsql::Database.new( SpecInfo.test_db )
     @iso_db.replicate_to( fdb )
     @iso_db.close
 
@@ -497,7 +497,7 @@ describe Amalgalite::Database do
   end
 
   it "imports batch statements" do
-    db = Amalgalite::Database.new(":memory:")
+    db = ::Libsql::Database.new(":memory:")
     db.import("CREATE TABLE things(stuff TEXT); INSERT INTO things (stuff) VALUES (\"foobar\");").should be_truthy
     db.first_value_from("SELECT stuff FROM things").should == "foobar"
   end

@@ -2,23 +2,23 @@
 # Copyright (c) 2008 Jeremy Hinegardner
 # All rights reserved.  See LICENSE and/or COPYING for details.
 #++
-require 'amalgalite/statement'
-require 'amalgalite/trace_tap'
-require 'amalgalite/profile_tap'
-require 'amalgalite/type_maps/default_map'
-require 'amalgalite/function'
-require 'amalgalite/aggregate'
-require 'amalgalite/busy_timeout'
-require 'amalgalite/progress_handler'
-require 'amalgalite/csv_table_importer'
+require 'libsql/statement'
+require 'libsql/trace_tap'
+require 'libsql/profile_tap'
+require 'libsql/type_maps/default_map'
+require 'libsql/function'
+require 'libsql/aggregate'
+require 'libsql/busy_timeout'
+require 'libsql/progress_handler'
+require 'libsql/csv_table_importer'
 
-module Amalgalite
+module ::Libsql
   #
   # The encapsulation of a connection to an SQLite3 database.  
   #
   # Example opening and possibly creating a new database
   #
-  #   db = Amalgalite::Database.new( "mydb.db" )
+  #   db = ::Libsql::Database.new( "mydb.db" )
   #   db.execute( "SELECT * FROM table" ) do |row|
   #     puts row
   #   end
@@ -27,28 +27,28 @@ module Amalgalite
   #
   # Open a database read only:
   #
-  #   db = Amalgalite::Database.new( "mydb.db", "r" )
+  #   db = ::Libsql::Database.new( "mydb.db", "r" )
   #
   # Open an in-memory database:
   #
-  #   db = Amalgalite::MemoryDatabase.new
+  #   db = ::Libsql::MemoryDatabase.new
   #
   class Database
 
     # Error thrown if a database is opened with an invalid mode
-    class InvalidModeError < ::Amalgalite::Error; end
+    class InvalidModeError < ::Libsql::Error; end
 
     # Error thrown if there is a failure in a user defined function
-    class FunctionError < ::Amalgalite::Error; end
+    class FunctionError < ::Libsql::Error; end
 
     # Error thrown if there is a failure in a user defined aggregate
-    class AggregateError < ::Amalgalite::Error; end
+    class AggregateError < ::Libsql::Error; end
 
     # Error thrown if there is a failure in defining a busy handler
-    class BusyHandlerError < ::Amalgalite::Error; end
+    class BusyHandlerError < ::Libsql::Error; end
 
     # Error thrown if there is a failure in defining a progress handler
-    class ProgressHandlerError < ::Amalgalite::Error; end
+    class ProgressHandlerError < ::Libsql::Error; end
 
     ##
     # container class for holding transaction behavior constants.  These are the
@@ -78,16 +78,16 @@ module Amalgalite
       end
     end
 
-    include Amalgalite::SQLite3::Constants
+    include ::Libsql::SQLite3::Constants
 
-    # list of valid modes for opening an Amalgalite::Database
+    # list of valid modes for opening an ::Libsql::Database
     VALID_MODES = {
       "r"  => Open::READONLY,
       "r+" => Open::READWRITE,
       "w+" => Open::READWRITE | Open::CREATE,
     }
 
-    # the low level Amalgalite::SQLite3::Database
+    # the low level ::Libsql::SQLite3::Database
     attr_reader :api
 
     # An object that follows the TraceTap protocol, or nil.  By default this is nil
@@ -107,10 +107,10 @@ module Amalgalite
     attr_reader :aggregates
 
     ##
-    # Create a new Amalgalite database
+    # Create a new ::Libsql database
     #
     # :call-seq:
-    #   Amalgalite::Database.new( filename, "w+", opts = {}) -> Database
+    #   ::Libsql::Database.new( filename, "w+", opts = {}) -> Database
     #
     # The first parameter is the filename of the sqlite database.  Specifying
     # ":memory:" as the filename creates an in-memory database.
@@ -132,7 +132,7 @@ module Amalgalite
     # By default, databases are created with an encoding of utf8.  Setting this to 
     # true and opening an already existing database has no effect.
     #
-    # *NOTE* Currently :utf16 is not supported by Amalgalite, it is planned 
+    # *NOTE* Currently :utf16 is not supported by ::Libsql, it is planned 
     # for a later release
     #
     #
@@ -140,7 +140,7 @@ module Amalgalite
       @open           = false
       @profile_tap    = nil
       @trace_tap      = nil
-      @type_map       = ::Amalgalite::TypeMaps::DefaultMap.new
+      @type_map       = ::Libsql::TypeMaps::DefaultMap.new
       @functions      = Hash.new 
       @aggregates     = Hash.new
       @utf16          = false
@@ -150,9 +150,9 @@ module Amalgalite
       end
 
       if not File.exist?( filename ) and opts[:utf16] then
-        raise NotImplementedError, "Currently Amalgalite has not implemented utf16 support"
+        raise NotImplementedError, "Currently ::Libsql has not implemented utf16 support"
       else
-        @api = Amalgalite::SQLite3::Database.open( filename, VALID_MODES[mode] )
+        @api = ::Libsql::SQLite3::Database.open( filename, VALID_MODES[mode] )
       end
       @open = true
     end
@@ -192,14 +192,14 @@ module Amalgalite
     # SQL escape the input string
     #
     def escape( s )
-      Amalgalite::SQLite3.escape( s )
+      ::Libsql::SQLite3.escape( s )
     end
 
     ##
     # Surround the give string with single-quotes and escape any single-quotes
     # in the string
     def quote( s )
-      Amalgalite::SQLite3.quote( s )
+      ::Libsql::SQLite3.quote( s )
     end
 
     ##
@@ -262,7 +262,7 @@ module Amalgalite
     #   stmt = db.prepare( "INSERT INTO t1(x, y, z) VALUES ( :
     #
     def prepare( sql )
-      stmt = Amalgalite::Statement.new( self, sql )
+      stmt = ::Libsql::Statement.new( self, sql )
       if block_given? then
         begin 
           yield stmt
@@ -288,7 +288,7 @@ module Amalgalite
     #
     # On an error an exception is thrown
     #
-    # This is just a wrapper around the preparation of an Amalgalite Statement and
+    # This is just a wrapper around the preparation of an ::Libsql Statement and
     # iterating over the results.
     #
     def execute( sql, *bind_params )
@@ -319,7 +319,7 @@ module Amalgalite
         prepare( sql ) do |stmt|
           stmt.execute( *bind_params )
           sql =  stmt.remaining_sql 
-          sql = nil unless (sql.index(";") and Amalgalite::SQLite3.complete?( sql ))
+          sql = nil unless (sql.index(";") and ::Libsql::SQLite3.complete?( sql ))
         end
         count += 1
       end
@@ -379,7 +379,7 @@ module Amalgalite
     #
     # For instance:
     #
-    #   db.trace_tap = Amalgalite::TraceTap.new( logger, 'debug' )
+    #   db.trace_tap = ::Libsql::TraceTap.new( logger, 'debug' )
     # 
     # This will register an instance of TraceTap, which wraps an logger object.
     # On each +trace+ event the TraceTap#trace method will be called, which in
@@ -410,9 +410,9 @@ module Amalgalite
       if tap_obj.respond_to?( 'trace' ) then
         @trace_tap = tap_obj
       elsif tap_obj.respond_to?( 'write' ) then
-        @trace_tap = Amalgalite::TraceTap.new( tap_obj, 'write' )
+        @trace_tap = ::Libsql::TraceTap.new( tap_obj, 'write' )
       else
-        raise Amalgalite::Error, "#{tap_obj.class.name} cannot be used to tap.  It has no 'write' or 'trace' method.  Look at wrapping it in a Tap instances."
+        raise ::Libsql::Error, "#{tap_obj.class.name} cannot be used to tap.  It has no 'write' or 'trace' method.  Look at wrapping it in a Tap instances."
       end
 
       # and do the low level registration
@@ -434,7 +434,7 @@ module Amalgalite
     def type_map=( type_map_obj )
       %w[ bind_type_of result_value_of ].each do |method|
         unless type_map_obj.respond_to?( method )
-          raise Amalgalite::Error, "#{type_map_obj.class.name} cannot be used to do type mapping.  It does not respond to '#{method}'"
+          raise ::Libsql::Error, "#{type_map_obj.class.name} cannot be used to do type mapping.  It does not respond to '#{method}'"
         end
       end
       @type_map = type_map_obj
@@ -448,7 +448,7 @@ module Amalgalite
     # database.
     #
     def schema( dbname = "main" )
-      @schema ||= ::Amalgalite::Schema.new( self, dbname )
+      @schema ||= ::Libsql::Schema.new( self, dbname )
       if @schema and @schema.dirty?
         reload_schema!( dbname )
       end
@@ -488,13 +488,13 @@ module Amalgalite
     # As a convenience, these are constants available in the
     # Database::TransactionBehavior class.
     #
-    # Amalgalite Transactions are database level transactions, just as SQLite's
+    # ::Libsql Transactions are database level transactions, just as SQLite's
     # are.
     #
     # If a block is passed in, then when the block exits, it is guaranteed that
     # either 'COMMIT' or 'ROLLBACK' has been executed.  
     #
-    # If any exception happens during the transaction that is caught by Amalgalite, 
+    # If any exception happens during the transaction that is caught by ::Libsql, 
     # then a 'ROLLBACK' is issued when the block closes.  
     #
     # If no exception happens during the transaction then a 'COMMIT' is
@@ -509,7 +509,7 @@ module Amalgalite
     # True nexted transactions are available through the _savepoint_ method.
     #
     def transaction( mode = TransactionBehavior::DEFERRED, &block )
-      raise Amalgalite::Error, "Invalid transaction behavior mode #{mode}" unless TransactionBehavior.valid?( mode )
+      raise ::Libsql::Error, "Invalid transaction behavior mode #{mode}" unless TransactionBehavior.valid?( mode )
 
       # if already in a transaction, no need to start a new one.
       if not in_transaction? then
@@ -573,7 +573,7 @@ module Amalgalite
     #
     def savepoint( name )
       point_name = name.to_s.strip
-      raise Amalgalite::Error, "Invalid savepoint name '#{name}'" unless point_name and point_name.length > 1
+      raise ::Libsql::Error, "Invalid savepoint name '#{name}'" unless point_name and point_name.length > 1
       execute( "SAVEPOINT #{point_name};")
       if block_given? then
         begin
@@ -654,12 +654,12 @@ module Amalgalite
     #    * The return value of the +callable.to_proc.call+ is the return value
     #      of the SQL function
     #
-    # See also ::Amalgalite::Function
+    # See also ::Libsql::Function
     #
     def define_function( name, callable = nil, &block ) 
       p = ( callable || block ).to_proc
       raise FunctionError, "Use only mandatory or arbitrary parameters in an SQL Function, not both" if p.arity < -1
-      db_function = ::Amalgalite::SQLite3::Database::Function.new( name, p )
+      db_function = ::Libsql::SQLite3::Database::Function.new( name, p )
       @api.define_function( db_function.name, db_function )
       @functions[db_function.signature] = db_function
       nil
@@ -676,7 +676,7 @@ module Amalgalite
     # Remove a function from use in the database.  Since the same function may
     # be registered more than once with different arity, you may specify the
     # arity, or the function object, or nil.  If nil is used for the arity, then
-    # Amalgalite does its best to remove all functions of given name.
+    # ::Libsql does its best to remove all functions of given name.
     #
     def remove_function( name, callable_or_arity = nil )
       arity = nil
@@ -688,7 +688,7 @@ module Amalgalite
       to_remove = []
 
       if arity then
-        signature = ::Amalgalite::SQLite3::Database::Function.signature( name, arity ) 
+        signature = ::Libsql::SQLite3::Database::Function.signature( name, arity ) 
         db_function = @functions[ signature ]
         raise FunctionError, "db function '#{name}' with arity #{arity} does not appear to be defined" unless db_function
         to_remove << db_function
@@ -710,7 +710,7 @@ module Amalgalite
     #
     # Define an SQL aggregate function, these are functions like max(), min(),
     # avg(), etc.  SQL functions that would be used when a GROUP BY clause is in
-    # effect.  See also ::Amalgalite::Aggregate.
+    # effect.  See also ::Libsql::Aggregate.
     #
     # A new instance of MyAggregateClass is created for each instance that the
     # SQL aggregate is mentioned in SQL.
@@ -734,7 +734,7 @@ module Amalgalite
     # Remove an aggregate from use in the database.  Since the same aggregate
     # may be refistered more than once with different arity, you may specify the
     # arity, or the aggregate class, or nil.  If nil is used for the arity then
-    # Amalgalite does its best to remove all aggregates of the given name
+    # ::Libsql does its best to remove all aggregates of the given name
     #
     def remove_aggregate( name, klass_or_arity = nil )
       klass = nil
@@ -749,7 +749,7 @@ module Amalgalite
       end
       to_remove = []
       if arity then
-        signature = ::Amalgalite::SQLite3::Database::Function.signature( name, arity )
+        signature = ::Libsql::SQLite3::Database::Function.signature( name, arity )
         db_aggregate = @aggregates[ signature ]
         raise AggregateError, "db aggregate '#{name}' with arity #{arity} does not appear to be defined" unless db_aggregate
         to_remove << db_aggregate
@@ -771,7 +771,7 @@ module Amalgalite
     #   db.busy_handler( callable )
     #   db.define_busy_handler do |count|
     #   end
-    #   db.busy_handler( Amalgalite::BusyTimeout.new( 30 ) )
+    #   db.busy_handler( ::Libsql::BusyTimeout.new( 30 ) )
     #
     # Register a busy handler for this database connection, the handler MUST
     # follow the +to_proc+ protocol indicating that is will 
@@ -877,10 +877,10 @@ module Amalgalite
     # call-seq:
     #   db.replicate_to( ":memory:" ) -> new_db
     #   db.replicate_to( "/some/location/my.db" ) -> new_db
-    #   db.replicate_to( Amalgalite::Database.new( "/my/backup.db" ) ) -> new_db
+    #   db.replicate_to( ::Libsql::Database.new( "/my/backup.db" ) ) -> new_db
     #
     # replicate_to() takes a single argument, either a String or an
-    # Amalgalite::Database.  It returns the replicated database object.  If
+    # ::Libsql::Database.  It returns the replicated database object.  If
     # given a String, it will truncate that database if it already exists.
     #
     # Replicate the current database to another location, this can be used for a
@@ -894,8 +894,8 @@ module Amalgalite
       to_db = nil
       case location 
       when String
-        to_db = Amalgalite::Database.new( location )
-      when Amalgalite::Database
+        to_db = ::Libsql::Database.new( location )
+      when ::Libsql::Database
         to_db = location
       else
         raise ArgumentError, "replicate_to( #{location} ) must be a String or a Database" 

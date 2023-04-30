@@ -3,10 +3,10 @@
 # All rights reserved.  See LICENSE and/or COPYING for details.
 #++
 
-require 'amalgalite/boolean'
-require 'amalgalite/blob'
+require 'libsql/boolean'
+require 'libsql/blob'
 
-module Amalgalite
+module ::Libsql
   ##
   # a class representing the meta information about an SQLite column, this class
   # serves both for general Schema level information, and for result set

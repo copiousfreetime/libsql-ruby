@@ -1,5 +1,5 @@
-require 'amalgalite/sqlite3/constants'
-module Amalgalite::SQLite3
+require 'libsql/sqlite3/constants'
+module ::Libsql::SQLite3
   class Database
     # 
     # A Stat represents a single Database Status code and its current highwater mark.
@@ -14,7 +14,7 @@ module Amalgalite::SQLite3
 
       def initialize( api_db, name )
         @name      = name
-        @code      = ::Amalgalite::SQLite3::Constants::DBStatus.value_from_name( name )
+        @code      = ::Libsql::SQLite3::Constants::DBStatus.value_from_name( name )
         @current   = nil
         @highwater = nil
         @api_db    = api_db 
@@ -44,11 +44,11 @@ module Amalgalite::SQLite3
     # of the SQLite3 C library.
     #
     class DBStatus
-      ::Amalgalite::SQLite3::Constants::DBStatus.constants.each do |const_name|
+      ::Libsql::SQLite3::Constants::DBStatus.constants.each do |const_name|
         method_name = const_name.downcase
         module_eval( <<-code, __FILE__, __LINE__ )
         def #{method_name}
-          @#{method_name} ||=  Amalgalite::SQLite3::Database::Stat.new( self.api_db, '#{method_name}' )   
+          @#{method_name} ||=  ::Libsql::SQLite3::Database::Stat.new( self.api_db, '#{method_name}' )   
         end
       code
       end

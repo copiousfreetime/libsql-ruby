@@ -2,7 +2,7 @@
 # Copyright (c) 2008 Jeremy Hinegardner
 # All rights reserved.  See LICENSE and/or COPYING for details.
 #++
-module Amalgalite
+module ::Libsql
   ##
   # Do type conversion on values that could be boolen values into 
   # real 'true' or 'false'

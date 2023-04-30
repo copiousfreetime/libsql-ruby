@@ -2,10 +2,10 @@
 # Copyright (c) 2008 Jeremy Hinegardner
 # All rights reserved.  See LICENSE and/or COPYING for details.
 #++
-module Amalgalite
+module ::Libsql
   #
   # Paths contains helpful methods to determine paths of files inside the
-  # Amalgalite library
+  # ::Libsql library
   #
   module Paths
     #

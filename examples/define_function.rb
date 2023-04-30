@@ -3,12 +3,12 @@
 require 'rubygems'
 $: << "../lib"
 $: << "../ext"
-require 'amalgalite'
+require 'libsql'
 
 #--
 # Create a database and a table to put some results from the functions in
 #--
-db = Amalgalite::Database.new( ":memory:" )
+db = ::Libsql::Database.new( ":memory:" )
 db.execute( "CREATE TABLE ftest( data, md5, sha1, sha2_bits, sha2)" )
 
 #------------------------------------------------------------------------------
@@ -62,7 +62,7 @@ db.define_function('sha2', SQLSha2.new)
 
 #------------------------------------------------------------------------------
 # Now we have 3 new sql functions, each defined in one of the available methods
-# to define sql functions in amalgalite.  Lets insert some rows and look at the
+# to define sql functions in libsql.  Lets insert some rows and look at the
 # results
 #------------------------------------------------------------------------------
 possible_bits = [ 256, 384, 512 ]

@@ -1,14 +1,14 @@
 require 'spec_helper'
-require 'amalgalite/type_maps/text_map'
+require 'libsql/type_maps/text_map'
 
-describe Amalgalite::TypeMaps::TextMap do
+describe ::Libsql::TypeMaps::TextMap do
   before(:each) do
-    @map = Amalgalite::TypeMaps::TextMap.new
+    @map = ::Libsql::TypeMaps::TextMap.new
   end
 
   describe "#bind_type_of" do
     it "returnes text for everything" do
-      @map.bind_type_of( 3.14 ).should == ::Amalgalite::SQLite3::Constants::DataType::TEXT
+      @map.bind_type_of( 3.14 ).should == ::Libsql::SQLite3::Constants::DataType::TEXT
     end
   end
 

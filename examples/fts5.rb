@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 require 'rubygems'
-require 'amalgalite'
+require 'libsql'
 require 'benchmark'
 require 'pathname'
 
@@ -30,8 +30,8 @@ fortune_path = Pathname.new(fortune_dir)
 #
 # Create a database, this will create the DB if it doesn't exist
 #
-puts "Opening database (version #{Amalgalite::VERSION})"
-db = Amalgalite::Database.new("fts5.db")
+puts "Opening database (version #{::Libsql::VERSION})"
+db = ::Libsql::Database.new("fts5.db")
 
 #
 # Create the schema unless it already exists in the table.  The meta information

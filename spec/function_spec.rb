@@ -11,7 +11,7 @@ describe "Scalar SQL Functions" do
   end
 
   it "has a signature" do
-    ::Amalgalite::Function.new( "testing_name", 42 ).signature.should == "testing_name/42"
+    ::Libsql::Function.new( "testing_name", 42 ).signature.should == "testing_name/42"
   end
 
   it "can define a custom SQL function as a lambda with 2 param" do
@@ -21,7 +21,7 @@ describe "Scalar SQL Functions" do
   end
 
   it "can define a custom SQL function as a class with N params" do
-    class FunctionTest1 < ::Amalgalite::Function
+    class FunctionTest1 < ::Libsql::Function
       def initialize
         super('ftest', -1)
       end
@@ -49,12 +49,12 @@ describe "Scalar SQL Functions" do
   end
 
   it "does not allow outrageous arity" do
-    class FunctionTest3 < ::Amalgalite::Function
+    class FunctionTest3 < ::Libsql::Function
       def initialize
         super( 'ftest3', 128)
       end
     end
-    lambda { @iso_db.define_function("ftest3", FunctionTest3.new) }.should raise_error( ::Amalgalite::SQLite3::Error, /SQLITE_ERROR .* Library used incorrectly/ )
+    lambda { @iso_db.define_function("ftest3", FunctionTest3.new) }.should raise_error( ::Libsql::SQLite3::Error, /SQLITE_ERROR .* Library used incorrectly/ )
   end
 
   it "raises an error if the function returns a complex Ruby object" do
@@ -63,7 +63,7 @@ describe "Scalar SQL Functions" do
     begin
       @iso_db.execute( "SELECT htest() AS h" ) 
     rescue => e
-      e.should be_instance_of( ::Amalgalite::SQLite3::Error )
+      e.should be_instance_of( ::Libsql::SQLite3::Error )
       e.message.should =~ /Unable to convert ruby object to an SQL function result/
     end
   end
@@ -72,7 +72,7 @@ describe "Scalar SQL Functions" do
     @iso_db.define_function( "etest" ) do 
       raise "error from within an sql function"
     end
-    lambda { @iso_db.execute( "SELECT etest() AS e" ) }.should raise_error( ::Amalgalite::SQLite3::Error, /error from within an sql function/ )
+    lambda { @iso_db.execute( "SELECT etest() AS e" ) }.should raise_error( ::Libsql::SQLite3::Error, /error from within an sql function/ )
   end
 end
 

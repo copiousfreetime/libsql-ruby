@@ -1,5 +1,5 @@
-require 'amalgalite/sqlite3/database/function'
-module Amalgalite
+require 'libsql/sqlite3/database/function'
+module ::Libsql
   #
   # A Base class to inherit from for creating your own SQL aggregate functions
   # in ruby.
@@ -22,7 +22,7 @@ module Amalgalite
   # For instance to implement a <i>unique_word_count(X)</i> aggregate function you could
   # implement it as:
   #
-  #   class UniqueWordCount < ::Amalgalite::Aggregate
+  #   class UniqueWordCount < ::Libsql::Aggregate
   #     attr_accessor :words
   #
   #     def initialize
@@ -67,7 +67,7 @@ module Amalgalite
     # function creation.
     #
     def signature
-      @signature ||= ::Amalgalite::SQLite3::Database::Function.signature( self.name, self.arity )
+      @signature ||= ::Libsql::SQLite3::Database::Function.signature( self.name, self.arity )
     end
   end
 end

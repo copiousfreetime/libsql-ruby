@@ -1,4 +1,4 @@
-module Amalgalite
+module ::Libsql
   ##
   # A base class for use in creating your own busy handler classes
   #

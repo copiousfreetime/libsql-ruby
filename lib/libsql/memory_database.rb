@@ -1,11 +1,11 @@
-require 'amalgalite/database'
-module Amalgalite
+require 'libsql/database'
+module ::Libsql
   #
   # The encapsulation of a connection to an SQLite3 in-memory database.  
   #
   # Open an in-memory database:
   #
-  #   db = Amalgalite::MemoryDatabase.new
+  #   db = ::Libsql::MemoryDatabase.new
   #
   class MemoryDatabase < Database
     def initialize

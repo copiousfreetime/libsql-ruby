@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-class PH < ::Amalgalite::ProgressHandler
+class PH < ::Libsql::ProgressHandler
   attr_reader :call_count
   def initialize( max = nil )
     @call_count = 0
@@ -29,7 +29,7 @@ end
 describe "Progress Handlers" do
 
   it "raises NotImplemented if #call is not overwritten" do
-    bh = ::Amalgalite::ProgressHandler.new
+    bh = ::Libsql::ProgressHandler.new
     lambda { bh.call }.should raise_error( ::NotImplementedError, /The progress handler call\(\) method must be implemented/ )
   end
 
@@ -67,7 +67,7 @@ describe "Progress Handlers" do
     qt = query_thread( @iso_db )
     qt.join
     ph.call_count.should eql(25)
-    qt[:exception].should be_instance_of( ::Amalgalite::SQLite3::Error )
+    qt[:exception].should be_instance_of( ::Libsql::SQLite3::Error )
     @iso_db.api.last_error_code.should be == 9
     @iso_db.api.last_error_message.should  =~ /interrupted/
     qt[:exception].message.should =~ /interrupted/
@@ -76,7 +76,7 @@ describe "Progress Handlers" do
   it "cannot register a block with the wrong arity" do
     lambda do 
       @iso_db.define_progress_handler { |x,y| puts "What!" }
-    end.should raise_error( ::Amalgalite::Database::ProgressHandlerError, /A progress handler expects 0 arguments, not 2/)
+    end.should raise_error( ::Libsql::Database::ProgressHandlerError, /A progress handler expects 0 arguments, not 2/)
   end
 
   it "can remove a progress handler" do

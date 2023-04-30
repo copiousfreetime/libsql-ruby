@@ -1,11 +1,11 @@
 require 'spec_helper'
 
-describe Amalgalite::Blob do
+describe ::Libsql::Blob do
 
   before(:each) do
     @blob_db_name = File.join(File.dirname( __FILE__ ), "blob.db")
     File.unlink @blob_db_name if File.exist?( @blob_db_name )
-    @db = Amalgalite::Database.new( @blob_db_name )
+    @db = ::Libsql::Database.new( @blob_db_name )
     @schema_sql = <<-SQL
       CREATE TABLE blobs(
         id      INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -13,7 +13,7 @@ describe Amalgalite::Blob do
         data    TEXT ); 
     SQL
     @db.execute( @schema_sql )
-    @country_data_file = Amalgalite::Iso3166Database.country_data_file
+    @country_data_file = ::Libsql::Iso3166Database.country_data_file
     @junk_file = File.join( File.dirname(__FILE__), "test_output")
   end
 
@@ -23,15 +23,15 @@ describe Amalgalite::Blob do
     File.unlink @junk_file    if File.exist?( @junk_file )
   end
 
-  { :file   => Amalgalite::Iso3166Database.country_data_file,
-    :string => IO.read( Amalgalite::Iso3166Database.country_data_file),
-    :io     => StringIO.new( IO.read( Amalgalite::Iso3166Database.country_data_file) ) }.each_pair do |style, data |
+  { :file   => ::Libsql::Iso3166Database.country_data_file,
+    :string => IO.read( ::Libsql::Iso3166Database.country_data_file),
+    :io     => StringIO.new( IO.read( ::Libsql::Iso3166Database.country_data_file) ) }.each_pair do |style, data |
     describe "inserts a blob from a #{style}" do
       before(:each) do
         column = @db.schema.tables['blobs'].columns['data']
         @db.execute("INSERT INTO blobs(name, data) VALUES ($name, $data)",
                     { "$name" => @country_data_file,
-                      "$data" => Amalgalite::Blob.new( style => data,
+                      "$data" => ::Libsql::Blob.new( style => data,
                                                       :column => column ) } )
         @db.execute("VACUUM")
       end
@@ -71,7 +71,7 @@ describe Amalgalite::Blob do
 
 
   it "raises an error if initialized incorrectly" do
-    lambda{ Amalgalite::Blob.new( :file => "/dev/null", :string => "foo" ) }.should raise_error( Amalgalite::Blob::Error )
+    lambda{ ::Libsql::Blob.new( :file => "/dev/null", :string => "foo" ) }.should raise_error( ::Libsql::Blob::Error )
   end
 end
 

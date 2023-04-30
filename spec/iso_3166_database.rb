@@ -1,6 +1,6 @@
-require 'amalgalite'
+require 'libsql'
 
-module Amalgalite
+module ::Libsql
   class Iso3166Database < Database
     def self.country_data_file
       @country_data_file ||= File.expand_path( File.join( File.dirname(__FILE__), "data", "iso-3166-country.txt" ) )

@@ -7,10 +7,10 @@ require 'date'
 require 'arrayfields'
 require 'ostruct'
 
-module Amalgalite
+module ::Libsql
   class Statement
 
-    include ::Amalgalite::SQLite3::Constants
+    include ::Libsql::SQLite3::Constants
 
     attr_reader :db
     attr_reader :api
@@ -126,7 +126,7 @@ module Amalgalite
     # Where 'num' is an Integer and 'var'is an alphanumerical variable.
     # They may exist in the SQL for which this Statement was created. 
     #
-    # Amalgalite binds parameters to these variables in the following manner:
+    # ::Libsql binds parameters to these variables in the following manner:
     # 
     # If bind is passed in an Array, either as +bind( "foo", "bar", "baz")+ or
     # as bind( ["foo", "bar", "baz"] ) then each of the params is assumed to be
@@ -163,7 +163,7 @@ module Amalgalite
         if position > 0 then
           bind_parameter_to( position, value )
         else
-          raise Amalgalite::Error, "Unable to find parameter '#{param}' in SQL statement [#{sql}]"
+          raise ::Libsql::Error, "Unable to find parameter '#{param}' in SQL statement [#{sql}]"
         end
       end
     end
@@ -201,7 +201,7 @@ module Amalgalite
           @stmt_api.bind_blob( position, value.source )
         end
       else
-        raise ::Amalgalite::Error, "Unknown binding type of #{bind_type} from #{db.type_map.class.name}.bind_type_of"
+        raise ::Libsql::Error, "Unknown binding type of #{bind_type} from #{db.type_map.class.name}.bind_type_of"
       end
     end
 
@@ -224,7 +224,7 @@ module Amalgalite
     def check_parameter_count!( num )
       expected = @stmt_api.parameter_count
       if num != expected then 
-        raise Amalgalite::Error, "#{sql} has #{expected} parameters, but #{num} were passed to bind."
+        raise ::Libsql::Error, "#{sql} has #{expected} parameters, but #{num} were passed to bind."
       end
       return expected
     end
@@ -277,7 +277,7 @@ module Amalgalite
             # if the rowid column is encountered, then we can use an incremental
             # blob api, otherwise we have to use the all at once version.
             if using_rowid_column? then
-              value = Amalgalite::Blob.new( :db_blob => SQLite3::Blob.new( db.api,
+              value = ::Libsql::Blob.new( :db_blob => SQLite3::Blob.new( db.api,
                                                                            col.schema.db,
                                                                            col.schema.table,
                                                                            col.schema.name,
@@ -285,10 +285,10 @@ module Amalgalite
                                                                            "r"),
                                             :column => col.schema)
             else
-              value = Amalgalite::Blob.new( :string => @stmt_api.column_blob( idx ), :column => col.schema )
+              value = ::Libsql::Blob.new( :string => @stmt_api.column_blob( idx ), :column => col.schema )
             end
           else
-            raise ::Amalgalite::Error, "BUG! : Unknown SQLite column type of #{column_type}"
+            raise ::Libsql::Error, "BUG! : Unknown SQLite column type of #{column_type}"
           end
 
           row << db.type_map.result_value_of( col.schema.declared_data_type, value )
@@ -300,8 +300,8 @@ module Amalgalite
       else
         self.close # must close so that the error message is guaranteed to be pushed into the database handler
                    # and we can can call last_error_message on it
-        msg = "SQLITE ERROR #{rc} (#{Amalgalite::SQLite3::Constants::ResultCode.name_from_value( rc )}) : #{@db.api.last_error_message}"
-        raise Amalgalite::SQLite3::Error, msg
+        msg = "SQLITE ERROR #{rc} (#{::Libsql::SQLite3::Constants::ResultCode.name_from_value( rc )}) : #{@db.api.last_error_message}"
+        raise ::Libsql::SQLite3::Error, msg
       end
       return row
     end
@@ -341,7 +341,7 @@ module Amalgalite
           tbl_name = @stmt_api.column_table_name( idx ) 
           col_name = @stmt_api.column_origin_name( idx ) 
 
-          column_meta.schema = ::Amalgalite::Column.new( db_name, tbl_name, col_name, idx )
+          column_meta.schema = ::Libsql::Column.new( db_name, tbl_name, col_name, idx )
           column_meta.schema.declared_data_type = @stmt_api.column_declared_type( idx )
 
           # only check for rowid if we have a table name and it is not one of the

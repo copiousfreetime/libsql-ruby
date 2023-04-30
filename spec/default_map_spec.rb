@@ -1,31 +1,31 @@
 require 'spec_helper'
-require 'amalgalite/type_maps/default_map'
+require 'libsql/type_maps/default_map'
 
-describe Amalgalite::TypeMaps::DefaultMap do
+describe ::Libsql::TypeMaps::DefaultMap do
   before(:each) do
-    @map = Amalgalite::TypeMaps::DefaultMap.new
+    @map = ::Libsql::TypeMaps::DefaultMap.new
   end
 
   describe "#bind_type_of" do
 
     it "Float is bound to DataType::FLOAT" do
-      @map.bind_type_of( 3.14 ).should == ::Amalgalite::SQLite3::Constants::DataType::FLOAT
+      @map.bind_type_of( 3.14 ).should == ::Libsql::SQLite3::Constants::DataType::FLOAT
     end
 
     it "Integer is bound to DataType::INTGER" do
-      @map.bind_type_of( 42 ).should == ::Amalgalite::SQLite3::Constants::DataType::INTEGER
+      @map.bind_type_of( 42 ).should == ::Libsql::SQLite3::Constants::DataType::INTEGER
     end
 
     it "nil is bound to DataType::NULL" do
-      @map.bind_type_of( nil ).should == ::Amalgalite::SQLite3::Constants::DataType::NULL
+      @map.bind_type_of( nil ).should == ::Libsql::SQLite3::Constants::DataType::NULL
     end
 
-    it "::Amalgalite::Blob is bound to DataType::BLOB" do
-      @map.bind_type_of( ::Amalgalite::Blob.new( :column => true, :string => "just a test" ) ).should == ::Amalgalite::SQLite3::Constants::DataType::BLOB
+    it "::Libsql::Blob is bound to DataType::BLOB" do
+      @map.bind_type_of( ::Libsql::Blob.new( :column => true, :string => "just a test" ) ).should == ::Libsql::SQLite3::Constants::DataType::BLOB
     end
 
     it "everything else is bound to DataType::TEXT" do
-      @map.bind_type_of( "everything else" ).should == ::Amalgalite::SQLite3::Constants::DataType::TEXT
+      @map.bind_type_of( "everything else" ).should == ::Libsql::SQLite3::Constants::DataType::TEXT
     end
 
   end
@@ -82,11 +82,11 @@ describe Amalgalite::TypeMaps::DefaultMap do
 
     it "raises and error if an unknown sql type is returned" do
       x = nil
-      lambda{ x = @map.result_value_of( "footype", "foo" ) }.should raise_error( ::Amalgalite::Error )
+      lambda{ x = @map.result_value_of( "footype", "foo" ) }.should raise_error( ::Libsql::Error )
     end
     
     it "raises and error if an ruby class is attempted to be mapped" do
-      lambda{ @map.result_value_of( "footype", 1..3 ) }.should raise_error( ::Amalgalite::Error )
+      lambda{ @map.result_value_of( "footype", 1..3 ) }.should raise_error( ::Libsql::Error )
     end
   end
 end

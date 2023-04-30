@@ -3,10 +3,10 @@ require 'ostruct'
 require 'pathname'
 require 'zlib'
 
-require 'amalgalite'
-module Amalgalite
+require 'libsql'
+module ::Libsql
   #
-  # Pack items into an amalgalite database.  
+  # Pack items into an libsql database.  
   #
   class Packer
     attr_reader :packing_list
@@ -50,44 +50,44 @@ module Amalgalite
       # return the files in their dependency order for use for packing into a
       # database
       #
-      def amalgalite_require_order
+      def libsql_require_order
         @require_order ||= %w[
-          amalgalite.rb
-          amalgalite/sqlite3/database/function.rb
-          amalgalite/aggregate.rb
-          amalgalite/blob.rb
-          amalgalite/boolean.rb
-          amalgalite/busy_timeout.rb
-          amalgalite/column.rb
-          amalgalite/statement.rb
-          amalgalite/trace_tap.rb
-          amalgalite/profile_tap.rb
-          amalgalite/type_map.rb
-          amalgalite/type_maps/storage_map.rb
-          amalgalite/type_maps/text_map.rb
-          amalgalite/type_maps/default_map.rb
-          amalgalite/function.rb
-          amalgalite/progress_handler.rb
-          amalgalite/csv_table_importer.rb
-          amalgalite/database.rb
-          amalgalite/index.rb
-          amalgalite/memory_database.rb
-          amalgalite/paths.rb
-          amalgalite/table.rb
-          amalgalite/view.rb
-          amalgalite/schema.rb
-          amalgalite/version.rb
-          amalgalite/sqlite3/version.rb
-          amalgalite/sqlite3/constants.rb
-          amalgalite/sqlite3/status.rb
-          amalgalite/sqlite3/database/status.rb
-          amalgalite/sqlite3.rb
-          amalgalite/taps/io.rb
-          amalgalite/taps/console.rb
-          amalgalite/taps.rb
-          amalgalite/packer.rb
-          amalgalite/core_ext/kernel/require.rb
-          amalgalite/requires.rb
+          libsql.rb
+          libsql/sqlite3/database/function.rb
+          libsql/aggregate.rb
+          libsql/blob.rb
+          libsql/boolean.rb
+          libsql/busy_timeout.rb
+          libsql/column.rb
+          libsql/statement.rb
+          libsql/trace_tap.rb
+          libsql/profile_tap.rb
+          libsql/type_map.rb
+          libsql/type_maps/storage_map.rb
+          libsql/type_maps/text_map.rb
+          libsql/type_maps/default_map.rb
+          libsql/function.rb
+          libsql/progress_handler.rb
+          libsql/csv_table_importer.rb
+          libsql/database.rb
+          libsql/index.rb
+          libsql/memory_database.rb
+          libsql/paths.rb
+          libsql/table.rb
+          libsql/view.rb
+          libsql/schema.rb
+          libsql/version.rb
+          libsql/sqlite3/version.rb
+          libsql/sqlite3/constants.rb
+          libsql/sqlite3/status.rb
+          libsql/sqlite3/database/status.rb
+          libsql/sqlite3.rb
+          libsql/taps/io.rb
+          libsql/taps/console.rb
+          libsql/taps.rb
+          libsql/packer.rb
+          libsql/core_ext/kernel/require.rb
+          libsql/requires.rb
         ]
       end
     end
@@ -140,7 +140,7 @@ module Amalgalite
     # manifest is an array of OpenStructs.  
     #
     def pack_files( manifest )
-      db = Amalgalite::Database.new( dbfile )
+      db = ::Libsql::Database.new( dbfile )
       check_db( db )
       max_width = manifest.collect{ |m| m.require_path.length }.sort.last
       contents_column = db.schema.tables[ options[:table_name] ].columns[ options[:contents_column] ]
@@ -164,7 +164,7 @@ module Amalgalite
               end
               content_io = StringIO.new( contents )
               stmt.execute( "$filename"   => file_info.require_path,
-                            "$contents"   => Amalgalite::Blob.new( :io => content_io,
+                            "$contents"   => ::Libsql::Blob.new( :io => content_io,
                                                                    :column => contents_column ),
                             "$compressed" => options[:compressed] )
               STDERR.puts "#{msg} stored #{file_info.file_path}" if options[:verbose]

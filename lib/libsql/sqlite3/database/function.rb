@@ -1,4 +1,4 @@
-module Amalgalite::SQLite3
+module ::Libsql::SQLite3
   class Database
     ##
     # A wrapper around a proc for use as an SQLite Ddatabase fuction

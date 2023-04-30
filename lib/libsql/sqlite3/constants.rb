@@ -2,7 +2,7 @@
 # Copyright (c) 2008 Jeremy Hinegardner
 # All rights reserved.  See LICENSE and/or COPYING for details.
 #++
-module Amalgalite::SQLite3
+module ::Libsql::SQLite3
   module Constants
     module Helpers
       #
@@ -54,7 +54,7 @@ module Amalgalite::SQLite3
 
     ##
     # Status defines the namespace for all the possible status flags for
-    # Amalgalite::SQLite3::Status objects
+    # ::Libsql::SQLite3::Status objects
     #
     module Status
       extend Helpers
@@ -62,7 +62,7 @@ module Amalgalite::SQLite3
 
     ##
     # DBStatus defines the namespace for all the possible status codes for the
-    # Amalgalite::SQlite3::Database::Status objects.
+    # ::Libsql::SQlite3::Database::Status objects.
     #
     module DBStatus
       extend Helpers

@@ -1,9 +1,9 @@
 require 'spec_helper'
 
-require 'amalgalite'
-require 'amalgalite/schema'
+require 'libsql'
+require 'libsql/schema'
 
-describe Amalgalite::Schema do
+describe ::Libsql::Schema do
 
   it "loads the schema of a database" do
     schema = @iso_db.schema

@@ -3,12 +3,12 @@
 # All rights reserved.  See LICENSE and/or COPYING for details.
 #++
 
-require 'amalgalite/table'
-require 'amalgalite/index'
-require 'amalgalite/column'
-require 'amalgalite/view'
+require 'libsql/table'
+require 'libsql/index'
+require 'libsql/column'
+require 'libsql/view'
 
-module Amalgalite
+module ::Libsql
   #
   # An object view of the schema  in the SQLite database.  If the schema changes
   # after this class is created, it has no knowledge of that.
@@ -38,7 +38,7 @@ module Amalgalite
       @master_table   = master_table
 
       if @master_table == 'sqlite_master' then
-        @temp_schema = ::Amalgalite::Schema.new( db, 'temp', 'sqlite_temp_master')
+        @temp_schema = ::Libsql::Schema.new( db, 'temp', 'sqlite_temp_master')
       else
         @temp_schema = nil
       end
@@ -108,7 +108,7 @@ module Amalgalite
       table_info = rows.first
       table = nil
       if table_info then
-        table = Amalgalite::Table.new( table_info['tbl_name'], table_info['sql'] )
+        table = ::Libsql::Table.new( table_info['tbl_name'], table_info['sql'] )
         table.schema = self
         table.columns = load_columns( table )
         table.indexes = load_indexes( table )
@@ -125,7 +125,7 @@ module Amalgalite
 
       @db.prepare("SELECT name, sql FROM #{catalog_master_table} WHERE type ='index' and tbl_name = $name") do |idx_stmt|
         idx_stmt.execute( "$name" => table.name) do |idx_info|
-          indexes[idx_info['name']] = Amalgalite::Index.new( idx_info['name'], idx_info['sql'], table )
+          indexes[idx_info['name']] = ::Libsql::Index.new( idx_info['name'], idx_info['sql'], table )
         end
       end
 
@@ -134,7 +134,7 @@ module Amalgalite
 
         # temporary indexes do not show up in the previous list
         if idx.nil? then
-          idx = Amalgalite::Index.new( idx_list['name'], nil, table )
+          idx = ::Libsql::Index.new( idx_list['name'], nil, table )
           indexes[idx_list['name']] = idx
         end
 
@@ -155,7 +155,7 @@ module Amalgalite
       cols = {}
       idx = 0
       @db.execute("PRAGMA #{catalog}.table_info(#{@db.quote(table.name)})") do |row|
-        col = Amalgalite::Column.new( catalog,  table.name, row['name'], row['cid'])
+        col = ::Libsql::Column.new( catalog,  table.name, row['name'], row['cid'])
 
         col.default_value       = row['dflt_value']
 
@@ -206,7 +206,7 @@ module Amalgalite
     def load_view( name )
       rows = @db.execute("SELECT name, sql FROM #{catalog_master_table} WHERE type = 'view' AND name = ?", name )
       view_info = rows.first
-      view = Amalgalite::View.new( view_info['name'], view_info['sql'] )
+      view = ::Libsql::View.new( view_info['name'], view_info['sql'] )
       view.schema = self
       return view
     end

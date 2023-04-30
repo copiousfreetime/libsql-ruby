@@ -1,4 +1,4 @@
 require 'spec_helper'
 
-describe Amalgalite do
+describe ::Libsql do
 end

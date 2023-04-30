@@ -3,13 +3,13 @@
 # All rights reserved.  See LICENSE and/or COPYING for details.
 #++
 
-require 'amalgalite/taps/io'
+require 'libsql/taps/io'
 
-module Amalgalite::Taps
+module ::Libsql::Taps
   #
   # Class provide an IO tap that can write to $stdout
   #
-  class Stdout < ::Amalgalite::Taps::IO
+  class Stdout < ::Libsql::Taps::IO
     def initialize
       super( $stdout )
     end
@@ -18,7 +18,7 @@ module Amalgalite::Taps
   #
   # This class provide an IO tap that can write to $stderr
   #
-  class Stderr < ::Amalgalite::Taps::IO
+  class Stderr < ::Libsql::Taps::IO
     def initialize
       super( $stderr )
     end

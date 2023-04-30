@@ -1,8 +1,8 @@
 require 'spec_helper'
-require 'amalgalite/version'
+require 'libsql/version'
 
-describe "Amalgalite::VERSION" do
+describe "::Libsql::VERSION" do
   it "should have a version string" do
-    expect(Amalgalite::VERSION).to match( /\d+\.\d+\.\d+/ )
+    expect(::Libsql::VERSION).to match( /\d+\.\d+\.\d+/ )
   end
 end

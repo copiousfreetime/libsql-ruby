@@ -2,7 +2,7 @@
 # Copyright (c) 2008 Jeremy Hinegardner
 # All rights reserved.  See LICENSE and/or COPYING for details.
 #++
-module Amalgalite
+module ::Libsql
   ##
   # This is the interface to allow Blob objects to be written to and read from
   # the SQLite database.  When using statements, use a Blob object as
@@ -14,12 +14,12 @@ module Amalgalite
   #   blob_column = db.schema.tables['blobs'].columns['data']
   #   db.execute("INSERT INTO blobs(name, data) VALUES ( $name, $blob )",
   #             { "$name" => "/path/to/file",
-  #               "$blob" => Amalgalite::Blob.new( :file => '/path/to/file',
+  #               "$blob" => ::Libsql::Blob.new( :file => '/path/to/file',
   #                                                :column => blob_column) } )
   #
   #   db.execute("INSERT INTO blobs(id, data) VALUES ($id, $blob )",
   #             { "$name" => 'blobname',
-  #               "$blob" => Amalgalite::Blob.new( :io => "something with .read and .length methods",
+  #               "$blob" => ::Libsql::Blob.new( :io => "something with .read and .length methods",
   #                                                :column => blob_column) } )
   #
   # On select the blob data needs to be read into an IO object
@@ -43,10 +43,10 @@ module Amalgalite
   # Blob must resolvable to a String.
   #
   #   db.execute("SELECT FROM blobs(name, data) WHERE data = $blob",
-  #             { "$blob' => Amalgalite::Blob.new( :string => "A string of data" ) })
+  #             { "$blob' => ::Libsql::Blob.new( :string => "A string of data" ) })
   #
   class Blob 
-    class Error < ::Amalgalite::Error; end
+    class Error < ::Libsql::Error; end
     class << self
       def valid_source_params
         @valid_source_params ||= [ :file, :io, :string, :db_blob ]

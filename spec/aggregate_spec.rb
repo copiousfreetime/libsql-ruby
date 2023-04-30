@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-class AggregateTest1 < ::Amalgalite::Aggregate
+class AggregateTest1 < ::Libsql::Aggregate
   def initialize
     super
     @name = 'atest1'
@@ -19,7 +19,7 @@ end
 describe "Aggregate SQL Functions" do
 
   it "must have a finalize method implemented" do
-    ag = ::Amalgalite::Aggregate.new
+    ag = ::Libsql::Aggregate.new
     lambda { ag.finalize }.should raise_error( NotImplementedError, /Aggregate#finalize must be implemented/ )
   end
 
@@ -38,7 +38,7 @@ describe "Aggregate SQL Functions" do
     r.first['a'].should eql(242)
     @iso_db.remove_aggregate( "atest1", AggregateTest1 )
     @iso_db.aggregates.size.should eql(0)
-    lambda{ @iso_db.execute("SELECT atest1(id,name) as a, count(*) as c FROM country") }.should raise_error(::Amalgalite::SQLite3::Error, /no such function: atest1/ )
+    lambda{ @iso_db.execute("SELECT atest1(id,name) as a, count(*) as c FROM country") }.should raise_error(::Libsql::SQLite3::Error, /no such function: atest1/ )
   end
 
   it "can remove a custom SQL aggregate by arity" do
@@ -49,7 +49,7 @@ describe "Aggregate SQL Functions" do
     r.first['a'].should eql(242)
     @iso_db.remove_aggregate( "atest1", -1)
     @iso_db.aggregates.size.should eql(0)
-    lambda{ @iso_db.execute("SELECT atest1(id,name) as a, count(*) as c FROM country") }.should raise_error(::Amalgalite::SQLite3::Error, /no such function: atest1/ )
+    lambda{ @iso_db.execute("SELECT atest1(id,name) as a, count(*) as c FROM country") }.should raise_error(::Libsql::SQLite3::Error, /no such function: atest1/ )
   end
 
   it "can remove all custom SQL aggregates with the same name" do
@@ -64,7 +64,7 @@ describe "Aggregate SQL Functions" do
     r.first['a'].should eql(242)
     @iso_db.remove_aggregate( "atest1" )
     @iso_db.aggregates.size.should eql(0)
-    lambda{ @iso_db.execute("SELECT atest1(id,name) as a, count(*) as c FROM country") }.should raise_error(::Amalgalite::SQLite3::Error, /no such function: atest1/ )
+    lambda{ @iso_db.execute("SELECT atest1(id,name) as a, count(*) as c FROM country") }.should raise_error(::Libsql::SQLite3::Error, /no such function: atest1/ )
   end
 
 
@@ -74,7 +74,7 @@ describe "Aggregate SQL Functions" do
       def name() "atest2"; end
       def arity() -2; end
     end
-    lambda { @iso_db.define_aggregate("atest2", AggregateTest2 ) }.should raise_error( ::Amalgalite::Database::AggregateError, 
+    lambda { @iso_db.define_aggregate("atest2", AggregateTest2 ) }.should raise_error( ::Libsql::Database::AggregateError, 
                                                     /Use only mandatory or arbitrary parameters in an SQL Aggregate, not both/ )
   end
 
@@ -83,14 +83,14 @@ describe "Aggregate SQL Functions" do
       def name() "atest3"; end
       def arity() 128; end
     end
-    lambda { @iso_db.define_aggregate("atest3", AggregateTest3 ) }.should raise_error( ::Amalgalite::SQLite3::Error, /SQLITE_ERROR .* Library used incorrectly/ )
+    lambda { @iso_db.define_aggregate("atest3", AggregateTest3 ) }.should raise_error( ::Libsql::SQLite3::Error, /SQLITE_ERROR .* Library used incorrectly/ )
   end
 
   it "does not allow registering a function which does not match the defined name " do
     class AggregateTest4 < AggregateTest1
       def name() "name_mismatch"; end
     end
-    lambda { @iso_db.define_aggregate("atest4", AggregateTest4 ) }.should raise_error( ::Amalgalite::Database::AggregateError,
+    lambda { @iso_db.define_aggregate("atest4", AggregateTest4 ) }.should raise_error( ::Libsql::Database::AggregateError,
                                            /Aggregate implementation name 'name_mismatch' does not match defined name 'atest4'/)
   end
 
@@ -113,7 +113,7 @@ describe "Aggregate SQL Functions" do
     end
 
     @iso_db.define_aggregate( "atest5", AggregateTest5 )
-    lambda { @iso_db.execute( "SELECT atest5(*) AS a FROM country" ) }.should raise_error( ::Amalgalite::SQLite3::Error, /Stepwise error!/ )
+    lambda { @iso_db.execute( "SELECT atest5(*) AS a FROM country" ) }.should raise_error( ::Libsql::SQLite3::Error, /Stepwise error!/ )
   end
 
   it "handles an error being thrown during the finalize function" do
@@ -129,7 +129,7 @@ describe "Aggregate SQL Functions" do
       end
     end
     @iso_db.define_aggregate( "atest6", AggregateTest6 )
-    lambda { @iso_db.execute( "SELECT atest6(*) AS a FROM country" ) }.should raise_error( ::Amalgalite::SQLite3::Error, /Finalize error!/ )
+    lambda { @iso_db.execute( "SELECT atest6(*) AS a FROM country" ) }.should raise_error( ::Libsql::SQLite3::Error, /Finalize error!/ )
   end
 
   it "handles an error being thrown during initialization in the C extension" do
@@ -152,7 +152,7 @@ describe "Aggregate SQL Functions" do
       end
     end
     @iso_db.define_aggregate( "atest7", AggregateTest7 )
-    lambda { @iso_db.execute( "SELECT atest7(*) AS a FROM country" ) }.should raise_error( ::Amalgalite::SQLite3::Error, /Initialization error!/ )
+    lambda { @iso_db.execute( "SELECT atest7(*) AS a FROM country" ) }.should raise_error( ::Libsql::SQLite3::Error, /Initialization error!/ )
   end
 end
 

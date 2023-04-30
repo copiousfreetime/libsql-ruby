@@ -1,10 +1,10 @@
 require 'spec_helper'
-require 'amalgalite/sqlite3'
+require 'libsql/sqlite3'
 require 'rbconfig'
 
-describe "Amalgalite::SQLite3::Database::Status" do
+describe "::Libsql::SQLite3::Database::Status" do
   before(:each) do
-    @db = Amalgalite::Database.new( "lookaside-test.db" )
+    @db = ::Libsql::Database.new( "lookaside-test.db" )
     @db.execute(" create table t(a, b)")
     20.times do |x|
       @db.execute("insert into t(a, b) values (?,?);", x, x+1)

@@ -5,7 +5,7 @@ require 'spec_helper'
 #
 describe "SQLite3 R*Tree extension" do
   before( :each ) do
-    @db = Amalgalite::Database.new( ":memory:" )
+    @db = ::Libsql::Database.new( ":memory:" )
     x = @db.execute_batch <<-sql
     CREATE VIRTUAL TABLE demo_index USING rtree(
        id,              -- Integer primary key

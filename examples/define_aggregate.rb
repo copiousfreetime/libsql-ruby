@@ -3,18 +3,18 @@
 require 'rubygems'
 $: << "../lib"
 $: << "../ext"
-require 'amalgalite'
+require 'libsql'
 
 #--
 # Create a database and a table to put some results from the functions in
 #--
-db = Amalgalite::Database.new( ":memory:" )
+db = ::Libsql::Database.new( ":memory:" )
 db.execute( "CREATE TABLE atest( words )" )
 
 #------------------------------------------------------------------------------
 # Create unique word count aggregate 
 #------------------------------------------------------------------------------
-class UniqueWordCount < ::Amalgalite::Aggregate
+class UniqueWordCount < ::Libsql::Aggregate
   attr_accessor :words
 
   def initialize

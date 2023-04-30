@@ -1,17 +1,17 @@
 #!/usr/bin/env ruby
 
 #
-# Basic amalgalite example creating a table, inserting rows and doing various
+# Basic libsql example creating a table, inserting rows and doing various
 # selects and prepared statements
 #
 require 'rubygems'
-require 'amalgalite'
+require 'libsql'
 
 #
 # Create a database, this will create the DB if it doesn't exist
 #
-puts "Opening database (version #{Amalgalite::Version})"
-db = Amalgalite::Database.new("gems.db")
+puts "Opening database (version #{::Libsql::Version})"
+db = ::Libsql::Database.new("gems.db")
 
 #
 # Setup taps into profile and trace information of sqlite, the profile tap will
@@ -19,8 +19,8 @@ db = Amalgalite::Database.new("gems.db")
 # trace_tap.log file
 #
 puts "Establishing taps"
-db.trace_tap   = Amalgalite::Taps::IO.new( trace_tap_file = File.open("trace_tap.log", "w+") )
-db.profile_tap = Amalgalite::Taps::IO.new( profile_tap_file = File.open("profile_tap.log", "w+") )
+db.trace_tap   = ::Libsql::Taps::IO.new( trace_tap_file = File.open("trace_tap.log", "w+") )
+db.profile_tap = ::Libsql::Taps::IO.new( profile_tap_file = File.open("profile_tap.log", "w+") )
 
 #
 # Create the schema unless it already exists in the table.  The meta information

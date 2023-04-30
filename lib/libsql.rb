@@ -3,15 +3,15 @@
 # All rights reserved.  See LICENSE and/or COPYING for details.
 #++
 
-# check if sqlite3 has already been required.  Amalgalite conflicts with system
+# check if sqlite3 has already been required.  ::Libsql conflicts with system
 # level sqlite3 libraries.
 unless $LOADED_FEATURES.grep( /\Asqlite3/ ).empty? then
-  raise LoadError, "amalgalite conflicts with sqlite3, please choose one or the other."
+  raise LoadError, "libsql conflicts with sqlite3, please choose one or the other."
 end
 
-module Amalgalite
+module ::Libsql
   # 
-  # Base class of all errors in Amalgalite
+  # Base class of all errors in ::Libsql
   #
   class Error < ::StandardError; end
 end
@@ -21,31 +21,31 @@ end
 # this is the method recommended by rake-compiler
 begin
   # this will be for windows
-  require "amalgalite/#{RUBY_VERSION.sub(/\.\d+$/,'')}/amalgalite"
+  require "libsql/#{RUBY_VERSION.sub(/\.\d+$/,'')}/libsql"
 rescue LoadError
   # everyone else.
-  require 'amalgalite/amalgalite'
+  require 'libsql/libsql'
 end
 
 
-require 'amalgalite/aggregate'
-require 'amalgalite/blob'
-require 'amalgalite/boolean'
-require 'amalgalite/busy_timeout'
-require 'amalgalite/column'
-require 'amalgalite/database'
-require 'amalgalite/function'
-require 'amalgalite/index'
-require 'amalgalite/memory_database'
-require 'amalgalite/paths'
-require 'amalgalite/profile_tap'
-require 'amalgalite/progress_handler'
-require 'amalgalite/schema'
-require 'amalgalite/sqlite3'
-require 'amalgalite/statement'
-require 'amalgalite/table'
-require 'amalgalite/taps'
-require 'amalgalite/trace_tap'
-require 'amalgalite/type_map'
-require 'amalgalite/version'
-require 'amalgalite/view'
+require 'libsql/aggregate'
+require 'libsql/blob'
+require 'libsql/boolean'
+require 'libsql/busy_timeout'
+require 'libsql/column'
+require 'libsql/database'
+require 'libsql/function'
+require 'libsql/index'
+require 'libsql/memory_database'
+require 'libsql/paths'
+require 'libsql/profile_tap'
+require 'libsql/progress_handler'
+require 'libsql/schema'
+require 'libsql/sqlite3'
+require 'libsql/statement'
+require 'libsql/table'
+require 'libsql/taps'
+require 'libsql/trace_tap'
+require 'libsql/type_map'
+require 'libsql/version'
+require 'libsql/view'

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-class BusyHandlerTest < Amalgalite::BusyHandler
+class BusyHandlerTest < ::Libsql::BusyHandler
   attr_accessor :call_count
   def initialize( max = 5 )
     @max = max
@@ -18,8 +18,8 @@ end
 
 describe "Busy Handlers" do
   before(:each) do
-    @read_db = Amalgalite::Database.new( @iso_db_path )
-    @write_db = Amalgalite::Database.new( @iso_db_path )
+    @read_db = ::Libsql::Database.new( @iso_db_path )
+    @write_db = ::Libsql::Database.new( @iso_db_path )
   end
 
   after(:each) do
@@ -28,7 +28,7 @@ describe "Busy Handlers" do
   end
 
   it "raises NotImplemented if #call is not overwritten" do
-    bh = ::Amalgalite::BusyHandler.new
+    bh = ::Libsql::BusyHandler.new
     lambda { bh.call( 42 ) }.should raise_error( ::NotImplementedError, /The busy handler call\(N\) method must be implemented/ )
   end
 
@@ -54,7 +54,7 @@ describe "Busy Handlers" do
 
     # attempt to do a write operation and commit it
     @write_db.execute("DELETE FROM subcountry")
-    lambda { @write_db.execute("COMMIT"); }.should raise_error( ::Amalgalite::SQLite3::Error, /database is locked/ )
+    lambda { @write_db.execute("COMMIT"); }.should raise_error( ::Libsql::SQLite3::Error, /database is locked/ )
     call_count.should == 20
   end
 
@@ -82,7 +82,7 @@ describe "Busy Handlers" do
 
     # attempt to do a write operation and commit it
     @write_db.execute("DELETE FROM subcountry")
-    lambda { @write_db.execute("COMMIT"); }.should raise_error( ::Amalgalite::SQLite3::Error, /database is locked/ )
+    lambda { @write_db.execute("COMMIT"); }.should raise_error( ::Libsql::SQLite3::Error, /database is locked/ )
     call_count.should == 40
   end
 
@@ -101,12 +101,12 @@ describe "Busy Handlers" do
 
     # attempt to do a write operation and commit it
     @write_db.execute("DELETE FROM subcountry")
-    lambda { @write_db.execute("COMMIT"); }.should raise_error( ::Amalgalite::SQLite3::Error, /database is locked/ )
+    lambda { @write_db.execute("COMMIT"); }.should raise_error( ::Libsql::SQLite3::Error, /database is locked/ )
     h.call_count.should == 10
   end
 
   it "has a default timeout class available " do
-    to = ::Amalgalite::BusyTimeout.new( 5, 10 ) 
+    to = ::Libsql::BusyTimeout.new( 5, 10 ) 
     @write_db.busy_handler( to )
 
     # put a read lock on the database
@@ -121,7 +121,7 @@ describe "Busy Handlers" do
     # attempt to do a write operation and commit it
     @write_db.execute("DELETE FROM subcountry")
     before = Time.now
-    lambda { @write_db.execute("COMMIT"); }.should raise_error( ::Amalgalite::SQLite3::Error, /database is locked/ )
+    lambda { @write_db.execute("COMMIT"); }.should raise_error( ::Libsql::SQLite3::Error, /database is locked/ )
     after = Time.now
     to.call_count.should > 5
     (after - before).should > 0.05
@@ -130,7 +130,7 @@ describe "Busy Handlers" do
   it "cannot register a block with the wrong arity" do
     lambda do 
       @write_db.define_busy_handler { |x,y| puts "What!" }
-    end.should raise_error( ::Amalgalite::Database::BusyHandlerError, /A busy handler expects 1 and only 1 argument/ )
+    end.should raise_error( ::Libsql::Database::BusyHandlerError, /A busy handler expects 1 and only 1 argument/ )
   end
 
   it "can remove a busy handler" do
@@ -150,7 +150,7 @@ describe "Busy Handlers" do
     # attempt to do a write operation and commit it
     @write_db.execute("DELETE FROM subcountry")
     @write_db.remove_busy_handler
-    lambda { @write_db.execute("COMMIT"); }.should raise_error( ::Amalgalite::SQLite3::Error, /database is locked/ )
+    lambda { @write_db.execute("COMMIT"); }.should raise_error( ::Libsql::SQLite3::Error, /database is locked/ )
     bht.call_count.should == 0
   end
 

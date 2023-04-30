@@ -3,7 +3,7 @@
 # All rights reserved.  See LICENSE and/or COPYING for details.
 #++
 require 'set'
-module Amalgalite
+module ::Libsql
   #
   # a class representing the meta information about an SQLite table
   #

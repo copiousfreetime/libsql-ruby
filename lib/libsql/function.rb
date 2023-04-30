@@ -1,5 +1,5 @@
-require 'amalgalite/sqlite3/database/function'
-module Amalgalite
+require 'libsql/sqlite3/database/function'
+module ::Libsql
   #
   # A Base class to inherit from for creating your own SQL scalar functions
   # in ruby.
@@ -11,8 +11,8 @@ module Amalgalite
   # * http://www.sqlite.org/lang_corefunc.html
   # * http://www.sqlite.org/lang_datefunc.html
   #
-  # Functions defined in Amalgalite databases conform to the Proc interface.
-  # Everything that is defined in an Amalgalite database using +define_function+
+  # Functions defined in ::Libsql databases conform to the Proc interface.
+  # Everything that is defined in an ::Libsql database using +define_function+
   # has its +to_proc+ method called.  As a result, any Function must also
   # conform to the +to_proc+ protocol.
   #
@@ -22,7 +22,7 @@ module Amalgalite
   #
   # For instance to implement a _sha1(X)_ SQL function you could implement it as
   #
-  #   class SQLSha1 < ::Amalgalite::Function
+  #   class SQLSha1 < ::Libsql::Function
   #     def initialize
   #       super( 'md5', 1 )
   #     end
@@ -55,7 +55,7 @@ module Amalgalite
     # function definition and removal.
     #
     def signature
-      @signature ||= ::Amalgalite::SQLite3::Database::Function.signature( self.name, self.arity )
+      @signature ||= ::Libsql::SQLite3::Database::Function.signature( self.name, self.arity )
     end
   end
 end

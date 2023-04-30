@@ -3,17 +3,17 @@
 # All rights reserved.  See LICENSE and/or COPYING for details.
 #++
 
-require 'amalgalite/profile_tap'
+require 'libsql/profile_tap'
 require 'stringio'
 
-module Amalgalite
+module ::Libsql
   module Taps
     #
     # An IOTap is an easy way to send all top information to any IO based
     # object.  Both profile and trace tap information can be captured
     # This means you can send the events to STDOUT with:
     #
-    #   db.profile_tap = db.trace_tap  = Amalgalite::Taps::Stdout.new
+    #   db.profile_tap = db.trace_tap  = ::Libsql::Taps::Stdout.new
     #
     #
     class IO
@@ -58,7 +58,7 @@ module Amalgalite
     # This class provides an IO tap that writes to a StringIO.  The result is
     # available via .to_s or .string.
     #
-    class StringIO < ::Amalgalite::Taps::IO
+    class StringIO < ::Libsql::Taps::IO
       def initialize
         @stringio = ::StringIO.new
         super( @stringio )

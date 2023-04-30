@@ -3,7 +3,7 @@
 # All rights reserved.  See LICENSE and/or COPYING for details.
 #++
 
-module Amalgalite
+module ::Libsql
   #
   # A TraceTap receives tracing information from SQLite3. It receives the SQL
   # statement being executed as a +msg+ just before the statement first begins
@@ -20,7 +20,7 @@ module Amalgalite
 
     def initialize( wrapped_obj, send_to = 'trace' )
       unless wrapped_obj.respond_to?( send_to )
-        raise Amalgalite::Error, "#{wrapped_obj.class.name} does not respond to #{send_to.to_s} "
+        raise ::Libsql::Error, "#{wrapped_obj.class.name} does not respond to #{send_to.to_s} "
       end
 
       @delegate_obj = wrapped_obj

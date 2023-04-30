@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 #
-# An Amalgalite example showing how Blob's can be utilized
+# A Libsql example showing how Blob's can be utilized
 #
 # We'll make a database with one table, that we store files in.  We'll use the
 # Blob incremental IO to store the files and retrieve them from the database
@@ -19,8 +19,8 @@
 require 'rubygems'
 $: << "../lib"
 $: << "../ext"
-require 'amalgalite'
-require 'amalgalite/packer'
+require 'libsql'
+require 'libsql/packer'
 VALID_ACTIONS = %w[ list retrieve store ]
 def usage 
   STDERR.puts "Usage: #{File.basename($0)} ( #{VALID_ACTIONS.join(' | ')} )  file(s)"
@@ -38,7 +38,7 @@ file_list = ARGV
 #
 # create the database if it doesn't exist
 #
-db = Amalgalite::Database.new( "filestore.db" )
+db = ::Libsql::Database.new( "filestore.db" )
 
 case action
   #
@@ -63,9 +63,9 @@ when 'list'
   #
 when 'store'
   usage if file_list.empty?
-  require 'amalgalite/packer'
+  require 'libsql/packer'
 
-  packer = Amalgalite::Packer.new( :dbfile => 'filestore.db',
+  packer = ::Libsql::Packer.new( :dbfile => 'filestore.db',
                                    :compressed => false )
   packer.pack( file_list )
 
@@ -79,7 +79,7 @@ when 'retrieve'
     STDERR.puts "Dumping #{row['filename']} to stdout"
     if row['compressed'] then
       s = row['contents'].to_s
-      STDOUT.puts Amalgalite::Packer.gunzip( s )
+      STDOUT.puts ::Libsql::Packer.gunzip( s )
     else
       row['contents'].write_to_io( STDOUT )
     end
