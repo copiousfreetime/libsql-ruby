@@ -43,6 +43,7 @@ lib/libsql/sqlite3.rb
 lib/libsql/sqlite3/constants.rb
 lib/libsql/sqlite3/database/function.rb
 lib/libsql/sqlite3/database/status.rb
+lib/libsql/sqlite3/libsql_version.rb
 lib/libsql/sqlite3/status.rb
 lib/libsql/sqlite3/version.rb
 lib/libsql/statement.rb
@@ -79,6 +80,7 @@ spec/schema_spec.rb
 spec/spec_helper.rb
 spec/sqlite3/constants_spec.rb
 spec/sqlite3/database_status_spec.rb
+spec/sqlite3/libsql_version_spec.rb
 spec/sqlite3/status_spec.rb
 spec/sqlite3/version_spec.rb
 spec/sqlite3_spec.rb
