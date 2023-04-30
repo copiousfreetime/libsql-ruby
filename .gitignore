@@ -4,9 +4,8 @@ coverage/*
 tags
 lib/libsql/1.8
 lib/libsql/1.9
-lib/libsql/2.0
-lib/libsql/2.1
-lib/libsql/2.2
+lib/libsql/2.*
+lib/libsql/3.*
 ext/libsql/Makefile
 ext/libsql/rbconfig.rb
 ext/libsql/*.def
