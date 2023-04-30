@@ -36,7 +36,7 @@ typedef struct am_sqlite3_blob {
 } am_sqlite3_blob;
 
 /* wrapper struct around the information needed to call rb_apply
- * used to encapsulate data into a call for amalgalite_wrap_apply
+ * used to encapsulate data into a call for libsql_ext_wrap_apply
  */
 typedef struct am_protected {
     VALUE     instance;
@@ -128,10 +128,10 @@ extern VALUE am_sqlite3_blob_length(VALUE self);
 /*----------------------------------------------------------------------
  * more initialization methods
  *----------------------------------------------------------------------*/
-extern void Init_amalgalite_constants( );
-extern void Init_amalgalite_database( );
-extern void Init_amalgalite_statement( );
-extern void Init_amalgalite_blob( );
+extern void Init_libsql_ext_constants( );
+extern void Init_libsql_ext_database( );
+extern void Init_libsql_ext_statement( );
+extern void Init_libsql_ext_blob( );
 
  
 /***********************************************************************

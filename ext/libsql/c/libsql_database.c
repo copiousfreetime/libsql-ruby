@@ -1,4 +1,4 @@
-#include "amalgalite.h"
+#include "libsql_ext.h"
 /**
  * Copyright (c) 2008 Jeremy Hinegardner
  * All rights reserved.  See LICENSE and/or COPYING for details.
@@ -340,7 +340,7 @@ VALUE am_sqlite3_database_exec(VALUE self, VALUE rSQL)
  * https://sqlite.org/c3ref/c_trace.html
  *
  */
-int amalgalite_xTraceCallback(unsigned trace_type, void* tap, void* prepared_statement, void* extra)
+int libsql_ext_xTraceCallback(unsigned trace_type, void* tap, void* prepared_statement, void* extra)
 {
     VALUE     trace_obj = (VALUE) tap;
     char*           msg;
@@ -420,7 +420,7 @@ VALUE am_sqlite3_database_register_trace_tap(VALUE self, VALUE tap )
 
         am_db->trace_obj = tap;
         rb_gc_register_address( &(am_db->trace_obj) );
-        sqlite3_trace_v2( am_db->db, SQLITE_TRACE_STMT | SQLITE_TRACE_PROFILE, amalgalite_xTraceCallback, (void *)am_db->trace_obj );
+        sqlite3_trace_v2( am_db->db, SQLITE_TRACE_STMT | SQLITE_TRACE_PROFILE, libsql_ext_xTraceCallback, (void *)am_db->trace_obj );
     }
 
     return Qnil;
@@ -429,7 +429,7 @@ VALUE am_sqlite3_database_register_trace_tap(VALUE self, VALUE tap )
 /**
  * invoke a ruby function.  This is here to be used by rb_protect.
  */
-VALUE amalgalite_wrap_funcall2( VALUE arg )
+VALUE libsql_ext_wrap_funcall2( VALUE arg )
 {
     am_protected_t *protected = (am_protected_t*) arg;
     return rb_funcall2( protected->instance, protected->method, protected->argc, protected->argv );
@@ -440,7 +440,7 @@ VALUE amalgalite_wrap_funcall2( VALUE arg )
  * This converts the ruby value to the appropriate C-type and makes the
  * appropriate call sqlite3_result_* call
  */
-void amalgalite_set_context_result( sqlite3_context* context, VALUE result )
+void libsql_ext_set_context_result( sqlite3_context* context, VALUE result )
 {
     switch( TYPE(result) ) {
         case T_FIXNUM:
@@ -499,13 +499,13 @@ VALUE sqlite3_value_to_ruby_value( sqlite3_value* s_value )
 
 
 /**
- * the amalgalite xBusy handler that is used to invoke the ruby function for
+ * the libsql_ext xBusy handler that is used to invoke the ruby function for
  * doing busy callbacks.
  *
  * This function conforms to the xBusy function specification for
  * sqlite3_busy_handler.
  */
-int amalgalite_xBusy( void *pArg , int nArg)
+int libsql_ext_xBusy( void *pArg , int nArg)
 {
     VALUE         *args = ALLOCA_N( VALUE, 1 );
     VALUE          result = Qnil;
@@ -520,7 +520,7 @@ int amalgalite_xBusy( void *pArg , int nArg)
     protected.argc     = 1;
     protected.argv     = args;
 
-    result = rb_protect( amalgalite_wrap_funcall2, (VALUE)&protected, &state );
+    result = rb_protect( libsql_ext_wrap_funcall2, (VALUE)&protected, &state );
     if ( state || ( Qnil == result || Qfalse == result ) ){
         busy = 0;
      }
@@ -560,7 +560,7 @@ VALUE am_sqlite3_database_busy_handler( VALUE self, VALUE handler )
          * - keep a reference for ourselves with our database handle
          * - registere the handler reference with the garbage collector
          */
-        rc = sqlite3_busy_handler( am_db->db, amalgalite_xBusy, (void*)handler );
+        rc = sqlite3_busy_handler( am_db->db, libsql_ext_xBusy, (void*)handler );
         if ( SQLITE_OK != rc ) {
             rb_raise(eAS_Error, "Failure setting busy handler : [SQLITE_ERROR %d] : %s\n", 
                     rc, sqlite3_errmsg( am_db->db ));
@@ -573,13 +573,13 @@ VALUE am_sqlite3_database_busy_handler( VALUE self, VALUE handler )
 
 
 /**
- * the amalgalite xProgress  handler that is used to invoke the ruby function for
+ * the libsql_ext xProgress  handler that is used to invoke the ruby function for
  * doing progress handler callbacks.
  *
  * This function conforms to the xProgress function specification for
  * sqlite3_progress_handler.
  */
-int amalgalite_xProgress( void *pArg )
+int libsql_ext_xProgress( void *pArg )
 {
     VALUE          result = Qnil;
     int            state;
@@ -591,7 +591,7 @@ int amalgalite_xProgress( void *pArg )
     protected.argc     = 0;
     protected.argv     = NULL;
 
-    result = rb_protect( amalgalite_wrap_funcall2, (VALUE)&protected, &state );
+    result = rb_protect( libsql_ext_wrap_funcall2, (VALUE)&protected, &state );
     if ( state || ( Qnil == result || Qfalse == result ) ){
         cancel = 1;
      }
@@ -627,7 +627,7 @@ VALUE am_sqlite3_database_progress_handler( VALUE self, VALUE op_count, VALUE ha
          * - keep a reference for ourselves with our database handle
          * - register the handler reference with the garbage collector
          */
-        sqlite3_progress_handler( am_db->db, op_codes, amalgalite_xProgress, (void*)handler );
+        sqlite3_progress_handler( am_db->db, op_codes, libsql_ext_xProgress, (void*)handler );
         am_db->progress_handler_obj = handler;
         rb_gc_register_address( &(am_db->progress_handler_obj) );
     }
@@ -636,13 +636,13 @@ VALUE am_sqlite3_database_progress_handler( VALUE self, VALUE op_count, VALUE ha
 
 
 /**
- * the amalgalite xFunc callback that is used to invoke the ruby function for
+ * the libsql_ext xFunc callback that is used to invoke the ruby function for
  * doing scalar SQL functions.
  *
  * This function conforms to the xFunc function specification for
  * sqlite3_create_function
  */
-void amalgalite_xFunc( sqlite3_context* context, int argc, sqlite3_value** argv )
+void libsql_ext_xFunc( sqlite3_context* context, int argc, sqlite3_value** argv )
 {
     VALUE         *args = ALLOCA_N( VALUE, argc );
     VALUE          result;
@@ -663,13 +663,13 @@ void amalgalite_xFunc( sqlite3_context* context, int argc, sqlite3_value** argv 
     protected.argc     = argc;
     protected.argv     = args;
 
-    result = rb_protect( amalgalite_wrap_funcall2, (VALUE)&protected, &state );
+    result = rb_protect( libsql_ext_wrap_funcall2, (VALUE)&protected, &state );
     /* check the results */
     if ( state ) {
         VALUE msg = ERROR_INFO_MESSAGE();
         sqlite3_result_error( context, RSTRING_PTR(msg), (int)RSTRING_LEN(msg) );
     } else {
-        amalgalite_set_context_result( context, result );
+        libsql_ext_set_context_result( context, result );
     }
 
     return; 
@@ -693,7 +693,7 @@ VALUE am_sqlite3_database_define_function( VALUE self, VALUE name, VALUE proc_li
     rc = sqlite3_create_function( am_db->db,
                                   zFunctionName, nArg,
                                   SQLITE_UTF8,
-                                  (void *)proc_like, amalgalite_xFunc,
+                                  (void *)proc_like, libsql_ext_xFunc,
                                   NULL, NULL);
     if ( SQLITE_OK != rc ) {
         /* in the case of SQLITE_MISUSE the error message in the database may
@@ -745,20 +745,20 @@ VALUE am_sqlite3_database_remove_function( VALUE self, VALUE name, VALUE proc_li
 }
 
 /* wrap rb_class_new_instance so it can be called from within an rb_protect */
-VALUE amalgalite_wrap_new_aggregate( VALUE arg )
+VALUE libsql_ext_wrap_new_aggregate( VALUE arg )
 {
     return rb_class_new_instance( 0, 0, arg );
 }
 
 
 /**
- * the amalgalite xStep callback that is used to invoke the ruby method for
+ * the libsql_ext xStep callback that is used to invoke the ruby method for
  * doing aggregate step oprations as part of an aggregate SQL function.
  *
  * This function conforms to the xStep function specification for
  * sqlite3_create_function.
  */
-void amalgalite_xStep( sqlite3_context* context, int argc, sqlite3_value** argv )
+void libsql_ext_xStep( sqlite3_context* context, int argc, sqlite3_value** argv )
 {
     VALUE         *args = ALLOCA_N( VALUE, argc );
     VALUE          result;
@@ -780,7 +780,7 @@ void amalgalite_xStep( sqlite3_context* context, int argc, sqlite3_value** argv 
      */
     if ( *aggregate_context == T_NONE ) {
         VALUE klass = (VALUE) sqlite3_user_data( context );
-        result = rb_protect( amalgalite_wrap_new_aggregate, klass, &state );
+        result = rb_protect( libsql_ext_wrap_new_aggregate, klass, &state );
 
         /* exception was raised during initialization */
         if ( state ) {
@@ -810,7 +810,7 @@ void amalgalite_xStep( sqlite3_context* context, int argc, sqlite3_value** argv 
     protected.argc     = argc;
     protected.argv     = args;
 
-    result = rb_protect( amalgalite_wrap_funcall2, (VALUE)&protected, &state );
+    result = rb_protect( libsql_ext_wrap_funcall2, (VALUE)&protected, &state );
 
     /* check the results, if there is an error, set the @exception ivar */
     if ( state ) {
@@ -824,13 +824,13 @@ void amalgalite_xStep( sqlite3_context* context, int argc, sqlite3_value** argv 
 
 
 /**
- * the amalgalite xFinal callback that is used to invoke the ruby method for
+ * the libsql_ext xFinal callback that is used to invoke the ruby method for
  * doing aggregate final operations as part of an aggregate SQL function.
  *
  * This function conforms to the xFinal function specification for
  * sqlite3_create_function.
  */
-void amalgalite_xFinal( sqlite3_context* context )
+void libsql_ext_xFinal( sqlite3_context* context )
 {
     VALUE          result;
     int            state;
@@ -867,14 +867,14 @@ void amalgalite_xFinal( sqlite3_context* context )
         protected.argc     = 0;
         protected.argv     = NULL;
 
-        result = rb_protect( amalgalite_wrap_funcall2, (VALUE)&protected, &state );
+        result = rb_protect( libsql_ext_wrap_funcall2, (VALUE)&protected, &state );
 
         /* check the results */
         if ( state ) {
             VALUE msg = ERROR_INFO_MESSAGE();
             sqlite3_result_error( context, RSTRING_PTR(msg), (int)RSTRING_LEN(msg) );
         } else {
-            amalgalite_set_context_result( context, result );
+            libsql_ext_set_context_result( context, result );
         }
     } else {
         VALUE msg = rb_obj_as_string( exception );
@@ -908,8 +908,8 @@ VALUE am_sqlite3_database_define_aggregate( VALUE self, VALUE name, VALUE arity,
                                   SQLITE_UTF8,
                                   (void *)klass,
                                   NULL, /* for scalar functions, not used here */
-                                  amalgalite_xStep,
-                                  amalgalite_xFinal);
+                                  libsql_ext_xStep,
+                                  libsql_ext_xFinal);
     if ( SQLITE_OK != rc ) {
         /* in the case of SQLITE_MISUSE the error message in the database may
          * not be set.  In this case, hardcode the error. 
@@ -1143,7 +1143,7 @@ VALUE am_sqlite3_database_alloc(VALUE klass)
  * The ruby extension wrapper around the core sqlite3 database object.
  *
  */
-void Init_amalgalite_database( )
+void Init_libsql_ext_database( )
 {
 
     VALUE ma  = rb_define_module("Libsql");
@@ -1158,31 +1158,31 @@ void Init_amalgalite_database( )
     rb_define_singleton_method(cAS_Database, "open", am_sqlite3_database_open, -1);
     rb_define_singleton_method(cAS_Database, "open16", am_sqlite3_database_open16, 1);
     rb_define_method(cAS_Database, "prepare", am_sqlite3_database_prepare, 1);
-    rb_define_method(cAS_Database, "close", am_sqlite3_database_close, 0); /* in amalgalite_database.c */
-    rb_define_method(cAS_Database, "last_insert_rowid", am_sqlite3_database_last_insert_rowid, 0); /* in amalgalite_database.c */
-    rb_define_method(cAS_Database, "autocommit?", am_sqlite3_database_is_autocommit, 0); /* in amalgalite_database.c */
-    rb_define_method(cAS_Database, "register_trace_tap", am_sqlite3_database_register_trace_tap, 1); /* in amalgalite_database.c */
-    rb_define_method(cAS_Database, "table_column_metadata", am_sqlite3_database_table_column_metadata, 3); /* in amalgalite_database.c */
-    rb_define_method(cAS_Database, "row_changes", am_sqlite3_database_row_changes, 0); /* in amalgalite_database.c */
-    rb_define_method(cAS_Database, "total_changes", am_sqlite3_database_total_changes, 0); /* in amalgalite_database.c */
-    rb_define_method(cAS_Database, "last_error_code", am_sqlite3_database_last_error_code, 0); /* in amalgalite_database.c */
-    rb_define_method(cAS_Database, "last_error_message", am_sqlite3_database_last_error_message, 0); /* in amalgalite_database.c */
-    rb_define_method(cAS_Database, "define_function", am_sqlite3_database_define_function, 2); /* in amalgalite_database.c */
-    rb_define_method(cAS_Database, "remove_function", am_sqlite3_database_remove_function, 2); /* in amalgalite_database.c */
-    rb_define_method(cAS_Database, "define_aggregate", am_sqlite3_database_define_aggregate, 3); /* in amalgalite_database.c */
-    rb_define_method(cAS_Database, "remove_aggregate", am_sqlite3_database_remove_aggregate, 3); /* in amalgalite_database.c */
-    rb_define_method(cAS_Database, "busy_handler", am_sqlite3_database_busy_handler, 1); /* in amalgalite_database.c */
-    rb_define_method(cAS_Database, "progress_handler", am_sqlite3_database_progress_handler, 2); /* in amalgalite_database.c */
-    rb_define_method(cAS_Database, "interrupt!", am_sqlite3_database_interrupt_bang, 0); /* in amalgalite_database.c */
-    rb_define_method(cAS_Database, "replicate_to", am_sqlite3_database_replicate_to, 1); /* in amalgalite_database.c */
-    rb_define_method(cAS_Database, "execute_batch", am_sqlite3_database_exec, 1); /* in amalgalite_database.c */
+    rb_define_method(cAS_Database, "close", am_sqlite3_database_close, 0); /* in libsql_ext_database.c */
+    rb_define_method(cAS_Database, "last_insert_rowid", am_sqlite3_database_last_insert_rowid, 0); /* in libsql_ext_database.c */
+    rb_define_method(cAS_Database, "autocommit?", am_sqlite3_database_is_autocommit, 0); /* in libsql_ext_database.c */
+    rb_define_method(cAS_Database, "register_trace_tap", am_sqlite3_database_register_trace_tap, 1); /* in libsql_ext_database.c */
+    rb_define_method(cAS_Database, "table_column_metadata", am_sqlite3_database_table_column_metadata, 3); /* in libsql_ext_database.c */
+    rb_define_method(cAS_Database, "row_changes", am_sqlite3_database_row_changes, 0); /* in libsql_ext_database.c */
+    rb_define_method(cAS_Database, "total_changes", am_sqlite3_database_total_changes, 0); /* in libsql_ext_database.c */
+    rb_define_method(cAS_Database, "last_error_code", am_sqlite3_database_last_error_code, 0); /* in libsql_ext_database.c */
+    rb_define_method(cAS_Database, "last_error_message", am_sqlite3_database_last_error_message, 0); /* in libsql_ext_database.c */
+    rb_define_method(cAS_Database, "define_function", am_sqlite3_database_define_function, 2); /* in libsql_ext_database.c */
+    rb_define_method(cAS_Database, "remove_function", am_sqlite3_database_remove_function, 2); /* in libsql_ext_database.c */
+    rb_define_method(cAS_Database, "define_aggregate", am_sqlite3_database_define_aggregate, 3); /* in libsql_ext_database.c */
+    rb_define_method(cAS_Database, "remove_aggregate", am_sqlite3_database_remove_aggregate, 3); /* in libsql_ext_database.c */
+    rb_define_method(cAS_Database, "busy_handler", am_sqlite3_database_busy_handler, 1); /* in libsql_ext_database.c */
+    rb_define_method(cAS_Database, "progress_handler", am_sqlite3_database_progress_handler, 2); /* in libsql_ext_database.c */
+    rb_define_method(cAS_Database, "interrupt!", am_sqlite3_database_interrupt_bang, 0); /* in libsql_ext_database.c */
+    rb_define_method(cAS_Database, "replicate_to", am_sqlite3_database_replicate_to, 1); /* in libsql_ext_database.c */
+    rb_define_method(cAS_Database, "execute_batch", am_sqlite3_database_exec, 1); /* in libsql_ext_database.c */
 
 
     /*
      * Ecapuslate a SQLite3 Database stat
      */
     cAS_Database_Stat = rb_define_class_under( cAS_Database, "Stat", rb_cObject );
-    rb_define_method(cAS_Database_Stat, "update!", am_sqlite3_database_stat_update_bang, -1); /* in amalgalite_database.c */
+    rb_define_method(cAS_Database_Stat, "update!", am_sqlite3_database_stat_update_bang, -1); /* in libsql_ext_database.c */
 
 }
 

@@ -5,7 +5,7 @@
  * vim: shiftwidth=4 
 :*/ 
 
-#include "amalgalite.h"
+#include "libsql_ext.h"
 
 /* Module and Classes */
 VALUE mA;              /* module Libsql                     */
@@ -81,7 +81,7 @@ VALUE am_sqlite3_set_temp_directory( VALUE self, VALUE new_dir )
     return Qnil;
 }
 
-VALUE amalgalite_format_string( const char* pattern, VALUE string )
+VALUE libsql_ext_format_string( const char* pattern, VALUE string )
 {
     VALUE to_s= rb_funcall( string, rb_intern("to_s"), 0 );
     VALUE str = StringValue( to_s );
@@ -105,7 +105,7 @@ VALUE amalgalite_format_string( const char* pattern, VALUE string )
  */
 VALUE am_sqlite3_escape( VALUE self, VALUE string )
 { 
-    return ( Qnil == string ) ? Qnil : amalgalite_format_string( "%q", string );
+    return ( Qnil == string ) ? Qnil : libsql_ext_format_string( "%q", string );
 }
 
 /*
@@ -117,7 +117,7 @@ VALUE am_sqlite3_escape( VALUE self, VALUE string )
  */
 VALUE am_sqlite3_quote( VALUE self, VALUE string )
 {
-    return ( Qnil == string ) ? Qnil : amalgalite_format_string( "%Q", string );
+    return ( Qnil == string ) ? Qnil : libsql_ext_format_string( "%Q", string );
 }
 
 /*
@@ -290,7 +290,7 @@ VALUE am_sqlite3_compiled_source_id(VALUE self)
  *
  */
 
-void Init_amalgalite()
+void Init_libsql_ext()
 {
     int rc = 0;
 
@@ -318,28 +318,28 @@ void Init_amalgalite()
     /* 
      * Base class of all SQLite3 errors
      */
-    eAS_Error = rb_define_class_under(mAS, "Error", rb_eStandardError); /* in amalgalite.c */
+    eAS_Error = rb_define_class_under(mAS, "Error", rb_eStandardError); /* in libsql_ext.c */
 
     /**
      * Encapsulation of the SQLite C library version
      */
     mASV = rb_define_module_under(mAS, "Version");
-    rb_define_module_function(mASV, "to_s", am_sqlite3_runtime_version, 0); /* in amalgalite.c */
-    rb_define_module_function(mASV, "runtime_version", am_sqlite3_runtime_version, 0); /* in amalgalite.c */
-    rb_define_module_function(mASV, "to_i", am_sqlite3_runtime_version_number, 0); /* in amalgalite.c */
-    rb_define_module_function(mASV, "runtime_version_number", am_sqlite3_runtime_version_number, 0); /* in amalgalite.c */
-    rb_define_module_function(mASV, "compiled_version", am_sqlite3_compiled_version, 0 ); /* in amalgalite.c */
-    rb_define_module_function(mASV, "compiled_version_number", am_sqlite3_compiled_version_number, 0 ); /* in amalgalite.c */
-    rb_define_module_function(mASV, "runtime_source_id", am_sqlite3_runtime_source_id, 0); /* in amalgalite.c */
-    rb_define_module_function(mASV, "compiled_source_id", am_sqlite3_compiled_source_id, 0); /* in amalgalite.c */
+    rb_define_module_function(mASV, "to_s", am_sqlite3_runtime_version, 0); /* in libsql_ext.c */
+    rb_define_module_function(mASV, "runtime_version", am_sqlite3_runtime_version, 0); /* in libsql_ext.c */
+    rb_define_module_function(mASV, "to_i", am_sqlite3_runtime_version_number, 0); /* in libsql_ext.c */
+    rb_define_module_function(mASV, "runtime_version_number", am_sqlite3_runtime_version_number, 0); /* in libsql_ext.c */
+    rb_define_module_function(mASV, "compiled_version", am_sqlite3_compiled_version, 0 ); /* in libsql_ext.c */
+    rb_define_module_function(mASV, "compiled_version_number", am_sqlite3_compiled_version_number, 0 ); /* in libsql_ext.c */
+    rb_define_module_function(mASV, "runtime_source_id", am_sqlite3_runtime_source_id, 0); /* in libsql_ext.c */
+    rb_define_module_function(mASV, "compiled_source_id", am_sqlite3_compiled_source_id, 0); /* in libsql_ext.c */
 
     /*
      * Initialize the rest of the module
      */
-    Init_amalgalite_constants( );
-    Init_amalgalite_database( );
-    Init_amalgalite_statement( );
-    Init_amalgalite_blob( );
+    Init_libsql_ext_constants( );
+    Init_libsql_ext_database( );
+    Init_libsql_ext_statement( );
+    Init_libsql_ext_blob( );
 
     /*
      * initialize sqlite itself

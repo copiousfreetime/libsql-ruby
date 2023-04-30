@@ -1,4 +1,4 @@
-#include "amalgalite.h"
+#include "libsql_ext.h"
 /**
  * Copyright (c) 2008 Jeremy Hinegardner
  * All rights reserved.  See LICENSE and/or COPYING for details.
@@ -219,7 +219,7 @@ VALUE am_sqlite3_blob_alloc(VALUE klass)
  * incremental IO on a binary object, then you do not need to use Blob.
  */
 
-void Init_amalgalite_blob( )
+void Init_libsql_ext_blob( )
 {
 
     VALUE ma  = rb_define_module("Libsql");
