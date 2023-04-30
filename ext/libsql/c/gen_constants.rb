@@ -315,7 +315,7 @@ File.open(fname, "w+") do |f|
   f.puts ' *'
   f.puts ' * class holding constants in the sqlite extension'
   f.puts ' */'
-  f.puts "void Init_libsql_constants( )"
+  f.puts "void Init_libsql_ext_constants( )"
   f.puts "{"
   f.puts
   f.puts '    VALUE ma  = rb_define_module("Libsql");'

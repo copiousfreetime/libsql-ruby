@@ -6,7 +6,7 @@
  *
  * class holding constants in the sqlite extension
  */
-void Init_libsql_constants( )
+void Init_libsql_ext_constants( )
 {
 
     VALUE ma  = rb_define_module("Libsql");
