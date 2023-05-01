@@ -33,7 +33,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency(%q<rspec_junit_formatter>.freeze, ["~> 0.6"])
   s.add_development_dependency(%q<rake>.freeze, ["~> 13.0"])
   s.add_development_dependency(%q<rake-compiler>.freeze, ["~> 1.2"])
-  s.add_development_dependency(%q<rake-compiler-dock>.freeze, ["~> 1.2"])
+  s.add_development_dependency(%q<rake-compiler-dock>.freeze, ["~> 1.3"])
   s.add_development_dependency(%q<rdoc>.freeze, ["~> 6.5"])
   s.add_development_dependency(%q<simplecov>.freeze, ["~> 0.21"])
   s.add_development_dependency(%q<archive-zip>.freeze, ["~> 0.12"])
