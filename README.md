@@ -10,11 +10,12 @@
 ## INSTALL
 
 * `gem install libsql`
+* `bundle add libsql`
 
 ## DESCRIPTION
 
-libsql embeds the [libsql](https://libsql.org/) fork of the SQLite database
-engine as a ruby extension. There is no need to install libsql separately.
+libsql embeds the libsql fork of the SQLite database engine as a ruby extension.
+There is no need to install libsql separately.
 
 Look in the examples/ directory to see
 
@@ -43,7 +44,7 @@ against the [compile options from SQLite](https://www.sqlite.org/compile.html)
 
 ## CREDITS
 
-* Jamis Buck for the first [ruby sqlite implementation](http://www.rubyforge.org/projects/sqlite-ruby)
+* This is a straight port of the [amalgalite](https://github.com/copiousfreetime/amalgalite) gem, also written by me.
 
 ## CHANGES
 
